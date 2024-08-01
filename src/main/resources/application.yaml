@@ -8,9 +8,16 @@ spring:
 
 langchain4j:
   ollama:
-    chat-model:
-      base-url: http://localhost:11434
-      model-name: llama3.1:8b
-      
+    url: http://localhost:11434
+    model-name: llama3.1:8b
+    temperature: 0.7
+    log-requests: true
+    log-responses: true
+
+logging:
+  level:
+    dev:
+      langchain4j: DEBUG
+
 server:
   port: 1337

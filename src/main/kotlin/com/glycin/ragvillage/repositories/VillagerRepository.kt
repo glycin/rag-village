@@ -13,6 +13,8 @@ class VillagerRepository {
 
     fun getVillager(name: String) = villagers[name]!!
 
+    fun getAllVillagerNames() = villagers.keys.toSet()
+
     init {
         val npcs = listOf(
             Villager(

@@ -43,8 +43,8 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
 	//Langchain4j
-	implementation("dev.langchain4j:langchain4j-ollama-spring-boot-starter:$langChainVersion")
-	implementation("dev.langchain4j:langchain4j-spring-boot-starter:$langChainVersion")
+	implementation("dev.langchain4j:langchain4j-ollama:$langChainVersion")
+	implementation("dev.langchain4j:langchain4j:$langChainVersion")
 
 	//Kotlin
 	implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")

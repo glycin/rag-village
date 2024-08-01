@@ -18,6 +18,12 @@ class VillageController(
         return ResponseEntity.ok().body(response)
     }
 
+    @GetMapping("/chat")
+    fun chatWithVillager(@RequestParam("name") name: String, @RequestParam question: String): ResponseEntity<String> {
+        val response = villageService.chat(name, question)
+        return ResponseEntity.ok().body(response)
+    }
+
     @PostMapping("/init")
     fun initVillage(): ResponseEntity<*> {
         villageService.initVillage()
