@@ -38,6 +38,7 @@ dependencyManagement {
 dependencies {
 	//Spring
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -48,6 +49,8 @@ dependencies {
 
 	//Kotlin
 	implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
 	//Test
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

@@ -6,6 +6,9 @@ import com.glycin.ragvillage.model.VillagerChatPrompt
 import com.glycin.ragvillage.model.VillagerCommand
 import com.glycin.ragvillage.model.VillagerCommandPrompt
 import com.glycin.ragvillage.repositories.VillagerRepository
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 
@@ -13,7 +16,7 @@ private val LOG = KotlinLogging.logger {}
 
 @Service
 class VillageService(
-    private val ollama: OllamaService,
+    ollama: OllamaService,
     private val villagerRepository: VillagerRepository,
 ) {
 
@@ -29,12 +32,26 @@ class VillageService(
         }
     }
 
-    fun chat(name: String, question: String): String {
+    fun chat(name: String, message: String): Flow<String> {
         if(!this::villageState.isInitialized) { initVillage() }
+
         val villager = villagerRepository.getVillager(name)
         LOG.info { "Found villager ${villager.name} which is currently ${villager.state}" }
-        return villagerAssistant.chat(villager.name, VillagerChatPrompt(villager, question)).also {
-            LOG.info { it }
+        return callbackFlow {
+            val stream = villagerAssistant.chat(villager.name, VillagerChatPrompt(villager, message))
+            stream.onNext {
+                trySend(it).isSuccess
+            }.onComplete {
+                LOG.info { "completed chat" }
+                close()
+            }.onError { error ->
+                LOG.error { "${error.message}\n${error.stackTrace}" }
+                close(error)
+            }.start()
+
+            awaitClose {
+                // TODO: Necessary to do any cleanup?
+            }
         }
     }
 

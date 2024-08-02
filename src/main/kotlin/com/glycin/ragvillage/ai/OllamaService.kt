@@ -4,13 +4,13 @@ import com.glycin.ragvillage.ai.configuration.OllamaServiceConfiguration
 import com.glycin.ragvillage.model.VillagerChatPrompt
 import com.glycin.ragvillage.model.VillagerCommand
 import com.glycin.ragvillage.model.VillagerCommandPrompt
-import dev.langchain4j.data.message.ChatMessage
-import dev.langchain4j.memory.chat.ChatMemoryProvider
 import dev.langchain4j.memory.chat.MessageWindowChatMemory
 import dev.langchain4j.model.ollama.OllamaChatModel
+import dev.langchain4j.model.ollama.OllamaStreamingChatModel
 import dev.langchain4j.service.AiServices
 import dev.langchain4j.service.MemoryId
 import dev.langchain4j.service.SystemMessage
+import dev.langchain4j.service.TokenStream
 import dev.langchain4j.service.UserMessage
 import org.springframework.stereotype.Service
 
@@ -21,6 +21,15 @@ class OllamaService(
     val villagerAssistant: VillagerAssistant = AiServices.builder(VillagerAssistant::class.java)
         .chatLanguageModel(
             OllamaChatModel.builder()
+                .logRequests(config.logRequests)
+                .logResponses(config.logResponses)
+                .baseUrl(config.url)
+                .modelName(config.modelName)
+                .temperature(config.temperature)
+                .build()
+        )
+        .streamingChatLanguageModel(
+            OllamaStreamingChatModel.builder()
                 .logRequests(config.logRequests)
                 .logResponses(config.logResponses)
                 .baseUrl(config.url)
@@ -52,5 +61,5 @@ interface VillagerAssistant {
         You are the villager in the Villager object within the json you will receive. Answer the question within the question field within the json. 
         Answer the question by fully adapting the personality, age and the state of the villager.
     """)
-    fun chat(@MemoryId name: String, @UserMessage villagerPrompt: VillagerChatPrompt): String
+    fun chat(@MemoryId name: String, @UserMessage villagerPrompt: VillagerChatPrompt): TokenStream
 }

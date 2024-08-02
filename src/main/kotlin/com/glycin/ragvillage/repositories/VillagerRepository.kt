@@ -41,7 +41,7 @@ class VillagerRepository {
                 startWorkTime = "10:00",
                 endWorkTime = "18:00",
                 age = 50,
-                personality = Personality.CRUEL,
+                personality = Personality.HONEST,
                 state = VillagerState.IDLE
             ),
             Villager(
@@ -95,7 +95,7 @@ class VillagerRepository {
                 startWorkTime = "10:00",
                 endWorkTime = "18:00",
                 age = 50,
-                personality = Personality.CRUEL,
+                personality = Personality.WISE,
                 state = VillagerState.IDLE
             ),
             Villager(
@@ -221,7 +221,7 @@ class VillagerRepository {
                 startWorkTime = "19:00",
                 endWorkTime = "03:00",
                 age = 45,
-                personality = Personality.MALICIOUS,
+                personality = Personality.CURIOUS,
                 state = VillagerState.IDLE
             ),
             Villager(

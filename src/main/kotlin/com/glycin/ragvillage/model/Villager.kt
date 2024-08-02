@@ -33,9 +33,9 @@ enum class Personality {
     HONEST,
     DECEPTIVE,
     ADVENTUROUS,
-    CRUEL,
+    CRUEL, // The LLM's dont like this personality :(
     VINDICTIVE,
     MANIPULATIVE,
-    MALICIOUS,
+    MALICIOUS, // The LLM's dont like this personality :(
     CUNNING
 }
