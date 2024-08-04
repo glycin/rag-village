@@ -1,3 +1,5 @@
 Can't pass multiple pojos to llm using AI service?
 
 LLM's are kinda overprotective. Not fond of every orc personality
+
+Imagebind would be the dream? => ImageBind: One Embedding Space To Bind Them All https://arxiv.org/abs/2305.05665

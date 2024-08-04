@@ -4,6 +4,7 @@ import com.glycin.ragvillage.ai.configuration.OllamaServiceConfiguration
 import com.glycin.ragvillage.model.VillagerChatPrompt
 import com.glycin.ragvillage.model.VillagerCommand
 import com.glycin.ragvillage.model.VillagerCommandPrompt
+import com.glycin.ragvillage.utils.PromptConstants
 import dev.langchain4j.memory.chat.MessageWindowChatMemory
 import dev.langchain4j.model.ollama.OllamaChatModel
 import dev.langchain4j.model.ollama.OllamaStreamingChatModel
@@ -44,22 +45,23 @@ class OllamaService(
 }
 
 interface VillagerAssistant {
-    @SystemMessage("""
-        You are a helpful assistant and will answer the questions.
-    """)
+    @SystemMessage("""You are a helpful assistant and will answer the questions.""")
     fun ask(message: String): String
 
     @SystemMessage("""
-        You are controlling villagers in an RPG. The RPG is set in a peaceful orcish town in Mordor.
+        ${PromptConstants.VILLAGE_DESCRIPTION}
+        You are controlling villagers in an RPG taking place in little minas morgul.
         You will receive a villager description and a village state and will accordingly change the state based on the villager and the current village state.
-        A villager can only move to other villagers and to themselves! The moveTo property should only be the name of the target villager.If a villager shouldn't
+        A villager can only move to other villagers and not to themselves! The moveTo property should only be the name of the target villager. If a villager shouldn't
         move then leave the moveTo null.
     """)
     fun commandVillager(@MemoryId name: String, @UserMessage villagerPrompt: VillagerCommandPrompt): VillagerCommand
 
     @SystemMessage("""
-        You are the villager in the Villager object within the json you will receive. Answer the question within the question field within the json. 
-        Answer the question by fully adapting the personality, age and the state of the villager.
+        ${PromptConstants.VILLAGE_DESCRIPTION}
+        You are the villager within little minas morgul as described in the Villager object within the json you will receive. Answer the question within the question field in the json. 
+        Answer the question by fully adapting the personality, age and the state of the villager. Your answer should not be longer than 300 characters.
+        Do not wrap the answer in a json or in quotation marks.
     """)
     fun chat(@MemoryId name: String, @UserMessage villagerPrompt: VillagerChatPrompt): TokenStream
 }

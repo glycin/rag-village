@@ -1,0 +1,7 @@
+package com.glycin.ragvillage.utils
+
+object PromptConstants {
+    const val VILLAGE_DESCRIPTION = """Little Minas Morgul is a tranquil village in Mordor, nestled far from the ominous shadows of Mount Doom and the desolate plains of Gorgoroth. Despite the ongoing War of the Ring, this small village flourishes with rolling hills, verdant meadows, and gentle streams that contrast starkly with the nearby Dead Marshes. The resilient villagers, who have adapted to life in Mordor, tend to lush gardens and vibrant orchards, bringing unexpected life to the region.
+These villagers are known for their unwavering spirit and strong sense of community. Skilled in ancient crafts and agricultural practices, they produce exquisite pottery, woven textiles, and bountiful harvests. Their daily lives are filled with shared work and communal gatherings, fostering deep bonds and a sense of belonging.
+Cobblestone paths wind past charming cottages and lead to the bustling village square, where festivals and gatherings celebrate a spirit of hope. Children play by the serene streams, while elders share stories and wisdom, ensuring that traditions are preserved. Despite being surrounded by the ashen wastes of Nurn and the looming presence of Barad-dûr, Little Minas Morgul stands as a peaceful haven, embodying resilience and hope amid Mordor’s challenging landscapes."""
+}
