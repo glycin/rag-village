@@ -2,4 +2,10 @@ Can't pass multiple pojos to llm using AI service?
 
 LLM's are kinda overprotective. Not fond of every orc personality
 
-Imagebind would be the dream? => ImageBind: One Embedding Space To Bind Them All https://arxiv.org/abs/2305.05665
+Imagebind would be the dream? => ImageBind: One Embedding Space To Bind Them All https://arxiv.org/abs/2305.05665. Unfortunately my laptop can't run it.
+
+Maybe use CLIP and MS CLAP?
+
+Do i want to use Named Entity Recognition? NER -> https://weaviate.io/developers/weaviate/modules/reader-generator-modules/ner-transformers
+
+I am forced to embed things before sending them to databases with langchain4j. Meaning i cant leverage auto vectorization modules of vector db's

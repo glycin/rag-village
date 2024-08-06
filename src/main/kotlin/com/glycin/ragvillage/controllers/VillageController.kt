@@ -25,12 +25,6 @@ class VillageController(
         return ResponseEntity.ok().body(response)
     }
 
-    @PostMapping("/init")
-    fun initVillage(): ResponseEntity<*> {
-        villageService.initVillage()
-        return ResponseEntity.ok().body("Village initialized")
-    }
-
     @GetMapping("/ask")
     fun askQuestion(@RequestParam("question") question : String): ResponseEntity<String> {
         val response = villageService.ask(question)

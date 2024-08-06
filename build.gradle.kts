@@ -28,6 +28,7 @@ repositories {
 val springCloudVersion = "2023.0.3"
 val langChainVersion = "0.33.0"
 val kotlinLoggingVersion = "3.0.5"
+val weaviateVersion = "4.8.2"
 
 dependencyManagement {
 	imports {
@@ -51,6 +52,9 @@ dependencies {
 	implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
+	//Weaviate
+	implementation("io.weaviate:client:$weaviateVersion")
 
 	//Test
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

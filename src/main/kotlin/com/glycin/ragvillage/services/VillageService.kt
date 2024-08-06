@@ -6,6 +6,7 @@ import com.glycin.ragvillage.model.VillagerChatPrompt
 import com.glycin.ragvillage.model.VillagerCommand
 import com.glycin.ragvillage.model.VillagerCommandPrompt
 import com.glycin.ragvillage.repositories.VillagerRepository
+import com.glycin.ragvillage.repositories.WeaviateRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -18,6 +19,7 @@ private val LOG = KotlinLogging.logger {}
 class VillageService(
     ollama: OllamaService,
     private val villagerRepository: VillagerRepository,
+    private val weaviate: WeaviateRepository,
 ) {
 
     private val villagerAssistant = ollama.villagerAssistant
@@ -63,6 +65,7 @@ class VillageService(
     }
 
     fun ask(q: String): String {
+        weaviate.searchForSimpleText(q)
         return villagerAssistant.ask(q)
     }
 }
