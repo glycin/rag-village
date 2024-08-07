@@ -73,12 +73,14 @@ class VillageService(
         return emptyFlow()
     }
 
-    fun initVillage() {
+    fun initVillage(): Set<Villager> {
+        LOG.info { "initializing village" }
         villageState = VillageState(
             villagerRepository.getAllVillagers().map { it.name }.toSet(),
             setOf("town square", "marketplace", "river", "farm", "library", "armory"),
             "10:00",
         )
+        return villagerRepository.getAllVillagers()
     }
 
     fun ask(q: String): String {
