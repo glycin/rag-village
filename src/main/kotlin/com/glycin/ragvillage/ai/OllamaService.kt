@@ -48,17 +48,12 @@ interface VillagerAssistant {
     @SystemMessage("""You are a helpful assistant and will answer the questions.""")
     fun ask(message: String): String
 
-    @SystemMessage("""
-        ${PromptConstants.VILLAGE_DESCRIPTION}
-        You are controlling villagers in an RPG taking place in little minas morgul.
-        You will receive a villager description and a village state and will accordingly change the state based on the villager and the current village state.
-        A villager can only move to other villagers and not to themselves! The moveTo property should only be the name of the target villager. If a villager shouldn't
-        move then leave the moveTo null.
-    """)
+    @SystemMessage(PromptConstants.VILLAGE_COMMAND_PROMPT)
     fun commandVillager(@MemoryId name: String, @UserMessage villagerPrompt: VillagerCommandPrompt): VillagerCommand
 
     @SystemMessage("""
         ${PromptConstants.VILLAGE_DESCRIPTION}
+        You will receive some context in the Context field within the json you will receive.
         You are the villager within little minas morgul as described in the Villager object within the json you will receive. Answer the question within the question field in the json. 
         Answer the question by fully adapting the personality, age and the state of the villager. Your answer should not be longer than 300 characters.
         Do not wrap the answer in a json or in quotation marks.

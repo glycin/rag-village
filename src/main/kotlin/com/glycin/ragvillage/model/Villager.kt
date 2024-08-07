@@ -4,17 +4,15 @@ data class Villager(
     val name: String,
     val job: String,
     val age: Int,
-    val startWorkTime: String,
-    val endWorkTime: String,
     val personality: Personality,
-    val state: VillagerState,
+    var state: VillagerState,
+    val description: String,
+    val actions: MutableList<VillagerAction>,
 )
 enum class VillagerState {
     IDLE,
     WALKING,
     TALKING,
-    WORKING,
-    SLEEPING,
 }
 
 enum class Personality {
