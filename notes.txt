@@ -9,3 +9,11 @@ Maybe use CLIP and MS CLAP?
 Do i want to use Named Entity Recognition? NER -> https://weaviate.io/developers/weaviate/modules/reader-generator-modules/ner-transformers
 
 I am forced to embed things before sending them to databases with langchain4j. Meaning i cant leverage auto vectorization modules of vector db's
+
+Ways to improve RAG:
+    - GraphRAG
+    - Model fine tuning
+
+RAG as a name sucks, why not Cyborg Generation X (or CyborgGenX or CGX)
+
+Probably need to use Llava for vision. Can i run vision and LLM models at the same time?

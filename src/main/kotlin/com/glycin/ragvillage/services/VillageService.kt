@@ -77,7 +77,7 @@ class VillageService(
         LOG.info { "initializing village" }
         villageState = VillageState(
             villagerRepository.getAllVillagers().map { it.name }.toSet(),
-            setOf("town square", "marketplace", "river", "farm", "library", "armory"),
+            VillageLocation.entries.map { it.name }.toSet(),
             "10:00",
         )
         return villagerRepository.getAllVillagers()
