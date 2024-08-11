@@ -51,6 +51,7 @@ json
   "talkTo": (type: string or null),
   "wait": (type: boolean)
 }
+
 Example:
 
 Villager: Shagrat, who is WALKING, decides to move to the river. The output should be:

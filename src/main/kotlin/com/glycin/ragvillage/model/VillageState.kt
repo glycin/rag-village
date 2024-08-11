@@ -7,16 +7,16 @@ data class VillageState(
 )
 
 enum class VillageLocation{
-    CITY_HALL, //done
-    GARDEN, // done
-    POND, // done
-    LIBRARY, // done
-    RIVER_BRIDE, // DONE
+    CITY_HALL,
+    GARDEN,
+    POND,
+    LIBRARY,
+    RIVER_BRIDGE,
     MARKET,
     HEALER,
     PARK,
     BLACKSMITH,
-    INN, //done
-    PIER, // DONE
-    FOREST, // DONE
+    INN,
+    PIER,
+    FOREST,
 }
