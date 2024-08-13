@@ -1,5 +1,6 @@
 package com.glycin.ragvillage.services
 
+import com.glycin.ragvillage.ai.JudgeService
 import com.glycin.ragvillage.ai.OllamaService
 import com.glycin.ragvillage.model.*
 import com.glycin.ragvillage.repositories.VillagerRepository
@@ -16,6 +17,7 @@ private val LOG = KotlinLogging.logger {}
 @Service
 class VillageService(
     ollama: OllamaService,
+    private val judge: JudgeService,
     private val villagerRepository: VillagerRepository,
     private val weaviate: WeaviateRepository,
 ) {
@@ -27,7 +29,9 @@ class VillageService(
         if(!this::villageState.isInitialized) { initVillage() }
         val villager = villagerRepository.getVillager(name)
 
-        val command = villagerAssistant.commandVillager(villager.name, VillagerCommandPrompt(villager, villageState))
+        val potentialCommand = villagerAssistant.commandVillager(villager.name, VillagerCommandPrompt(villager.toPrompt(), villageState))
+        LOG.info { potentialCommand }
+        val command = judge.judgement.judgeCommand(potentialCommand)
 
         if(command.wait) {
             villager.state = VillagerState.IDLE
@@ -75,11 +79,13 @@ class VillageService(
 
     fun initVillage(): Set<Villager> {
         LOG.info { "initializing village" }
+        val allVillagers = villagerRepository.getAllVillagers()
         villageState = VillageState(
-            villagerRepository.getAllVillagers().map { it.name }.toSet(),
+            allVillagers.map { it.name }.toSet(),
             VillageLocation.entries.map { it.name }.toSet(),
             "10:00",
         )
+        judge.initAssistant(allVillagers.map { v -> v.toPrompt() }.toList(), villageState.villageLocations)
         return villagerRepository.getAllVillagers()
     }
 

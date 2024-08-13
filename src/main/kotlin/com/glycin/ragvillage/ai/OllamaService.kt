@@ -2,7 +2,6 @@ package com.glycin.ragvillage.ai
 
 import com.glycin.ragvillage.ai.configuration.OllamaServiceConfiguration
 import com.glycin.ragvillage.model.VillagerChatPrompt
-import com.glycin.ragvillage.model.VillagerCommand
 import com.glycin.ragvillage.model.VillagerCommandPrompt
 import com.glycin.ragvillage.utils.PromptConstants
 import dev.langchain4j.memory.chat.MessageWindowChatMemory
@@ -48,8 +47,8 @@ interface VillagerAssistant {
     @SystemMessage("""You are a helpful assistant and will answer the questions.""")
     fun ask(message: String): String
 
-    @SystemMessage(PromptConstants.VILLAGE_COMMAND_PROMPT)
-    fun commandVillager(@MemoryId name: String, @UserMessage villagerPrompt: VillagerCommandPrompt): VillagerCommand
+    @SystemMessage(PromptConstants.COMMAND_PROMPT)
+    fun commandVillager(@MemoryId name: String, @UserMessage villagerPrompt: VillagerCommandPrompt): String
 
     @SystemMessage("""
         ${PromptConstants.VILLAGE_DESCRIPTION}
