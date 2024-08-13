@@ -13,6 +13,12 @@ langchain4j:
     temperature: 0.7
     log-requests: true
     log-responses: true
+  ollama-vision:
+    url: http://localhost:11434
+    model-name: llava
+    temperature: 0.7
+    log-requests: false
+    log-responses: false
 
 logging:
   level:
