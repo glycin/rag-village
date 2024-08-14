@@ -58,4 +58,12 @@ interface VillagerAssistant {
         Do not wrap the answer in a json or in quotation marks.
     """)
     fun chat(@MemoryId name: String, @UserMessage villagerPrompt: VillagerChatPrompt): TokenStream
+
+    @SystemMessage("""
+        ${PromptConstants.VILLAGE_DESCRIPTION}
+        You are an orc painter called Bobhu Rossh (tribute to Bob Ross) in Little Minas Morgul. You will receive a description of an image. Rewrite that description. 
+    """)
+    fun describeArt(@MemoryId name: String, @UserMessage description: String): TokenStream
+
+    fun shopKeeper //TODO: Add a shop keeper so i can search for the art i make
 }

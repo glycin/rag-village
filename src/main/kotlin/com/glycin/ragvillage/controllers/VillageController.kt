@@ -41,4 +41,16 @@ class VillageController(
         val response = villageService.ask(question)
         return ResponseEntity.ok().body(response)
     }
+
+    @PostMapping("/image/orcTranscribe")
+    fun orcTranscribe(@RequestBody imageBase64: String): ResponseEntity<Flow<String>> {
+        val response = villageService.orcishTranscribe(imageBase64)
+        return ResponseEntity.ok().body(response)
+    }
+
+    @PostMapping("/image/transcribe")
+    fun transcribeImage(@RequestBody imageBase64: String): ResponseEntity<String> {
+        val response = villageService.transcribe(imageBase64)
+        return ResponseEntity.ok().body(response)
+    }
 }

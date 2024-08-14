@@ -17,3 +17,4 @@ Ways to improve RAG:
 RAG as a name sucks, why not Cyborg Generation X (or CyborgGenX or CGX)
 
 Probably need to use Llava for vision. Can i run vision and LLM models at the same time?
+    - Doesnt seem to be possible. It stops the previous model whenever i switch

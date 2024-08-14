@@ -5,6 +5,10 @@ object PromptConstants {
 These villagers are known for their unwavering spirit and strong sense of community. Skilled in ancient crafts and agricultural practices, they produce exquisite pottery, woven textiles, and bountiful harvests. Their daily lives are filled with shared work and communal gatherings, fostering deep bonds and a sense of belonging.
 Cobblestone paths wind past charming cottages and lead to the bustling village square, where festivals and gatherings celebrate a spirit of hope. Children play by the serene streams, while elders share stories and wisdom, ensuring that traditions are preserved. Despite being surrounded by the ashen wastes of Nurn and the looming presence of Barad-dûr, Little Minas Morgul stands as a peaceful haven, embodying resilience and hope amid Mordor’s challenging landscapes."""
 
+    const val LLAVA_IMAGE_TRANSCRIBE_PROMPT = """
+        What do you see?
+    """
+
     const val COMMAND_PROMPT = """
 You are managing villagers in Little Minas Morgul, a tranquil village in Mordor. You will receive the following inputs:
 

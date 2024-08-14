@@ -1,41 +1,34 @@
 package com.glycin.ragvillage.ai
 
 import com.glycin.ragvillage.ai.configuration.OllamaVisionConfiguration
-import dev.langchain4j.memory.chat.MessageWindowChatMemory
+import com.glycin.ragvillage.utils.PromptConstants
+import dev.langchain4j.data.message.ImageContent
+import dev.langchain4j.data.message.TextContent
+import dev.langchain4j.data.message.UserMessage
 import dev.langchain4j.model.ollama.OllamaChatModel
-import dev.langchain4j.model.ollama.OllamaStreamingChatModel
-import dev.langchain4j.service.AiServices
+import org.springframework.stereotype.Service
 
 // This should be called TheEyeOfSauronService, but ill be a good citizen...
+@Service
 class OllamaVisionService(
     visionConfig: OllamaVisionConfiguration
 ) {
-    val theEye: OllamaVision = AiServices.builder(OllamaVision::class.java)
-        .chatLanguageModel(
-            OllamaChatModel.builder()
+    private val vision: OllamaChatModel = OllamaChatModel.builder()
                 .logRequests(visionConfig.logRequests)
                 .logResponses(visionConfig.logResponses)
                 .baseUrl(visionConfig.url)
                 .modelName(visionConfig.modelName)
                 .temperature(visionConfig.temperature)
                 .build()
-        )
-        .streamingChatLanguageModel(
-            OllamaStreamingChatModel.builder()
-                .logRequests(visionConfig.logRequests)
-                .logResponses(visionConfig.logResponses)
-                .baseUrl(visionConfig.url)
-                .modelName(visionConfig.modelName)
-                .temperature(visionConfig.temperature)
-                .build()
-        )
-        .chatMemoryProvider { memoryId ->
-            MessageWindowChatMemory.withMaxMessages(50)
-        }
-        .build()
-}
 
-interface OllamaVision {
-    //In base64 encoded
-    fun transcribe(image: String): String
+    fun transcribe(image: String): String {
+        return vision.generate(getVisionUserMessage(image)).content().text()
+    }
+
+    private fun getVisionUserMessage(image: String): UserMessage {
+        return UserMessage.from(
+            TextContent.from(PromptConstants.LLAVA_IMAGE_TRANSCRIBE_PROMPT),
+            ImageContent.from(image, "image/jpg", ImageContent.DetailLevel.HIGH) // TODO: Maybe add png support
+        )
+    }
 }

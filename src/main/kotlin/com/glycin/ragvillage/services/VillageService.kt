@@ -2,6 +2,7 @@ package com.glycin.ragvillage.services
 
 import com.glycin.ragvillage.ai.JudgeService
 import com.glycin.ragvillage.ai.OllamaService
+import com.glycin.ragvillage.ai.OllamaVisionService
 import com.glycin.ragvillage.model.*
 import com.glycin.ragvillage.repositories.VillagerRepository
 import com.glycin.ragvillage.repositories.WeaviateRepository
@@ -17,6 +18,7 @@ private val LOG = KotlinLogging.logger {}
 @Service
 class VillageService(
     ollama: OllamaService,
+    private val theEye: OllamaVisionService,
     private val judge: JudgeService,
     private val villagerRepository: VillagerRepository,
     private val weaviate: WeaviateRepository,
@@ -87,6 +89,30 @@ class VillageService(
         )
         judge.initAssistant(allVillagers.map { v -> v.toPrompt() }.toList(), villageState.villageLocations)
         return villagerRepository.getAllVillagers()
+    }
+
+    fun orcishTranscribe(base64Image: String): Flow<String> {
+        LOG.info { "transcribing an image as an orc..." }
+        val description = transcribe(base64Image)
+        return callbackFlow {
+            val stream = villagerAssistant.describeArt("Bobhu", description)
+            stream.onNext {
+                trySend(it).isSuccess
+            }.onComplete {
+                LOG.info { "completed chat with Bobhu" }
+                close()
+            }.onError { error ->
+                LOG.error { "${error.message}\n${error.stackTrace}" }
+                close(error)
+            }.start()
+
+            awaitClose { }
+        }
+    }
+
+    fun transcribe(base64Image: String): String {
+        LOG.info { "transcribing an image..." }
+        return theEye.transcribe(base64Image)
     }
 
     fun ask(q: String): String {
