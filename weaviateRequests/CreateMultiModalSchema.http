@@ -1,0 +1,43 @@
+### Add SimpleText to weaviate schema
+POST /v1/schema
+Host: localhost:8080
+Content-Length: 1700
+
+{
+  "class": "StandardMultimodal",
+  "description": "A schema to store text and images",
+  "vectorizer": "multi2vec-clip",
+  "moduleConfig": {
+    "multi2vec-clip": {
+      "textFields": [
+        "text"
+      ],
+      "imageFields": [
+        "image"
+      ]
+    }
+  },
+  "properties": [
+    {
+      "dataType": [
+        "text"
+      ],
+      "name": "text",
+      "multi2vec-clip": {
+        "skip": false,
+        "vectorizePropertyName": false
+      }
+    },
+    {
+      "dataType": [
+        "blob"
+      ],
+      "name": "image",
+      "multi2vec-clip": {
+        "skip": false,
+        "vectorizePropertyName": false
+      }
+    }
+  ]
+}
+###

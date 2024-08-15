@@ -7,6 +7,7 @@ import dev.langchain4j.data.document.parser.TextDocumentParser
 import dev.langchain4j.data.document.splitter.DocumentSplitters
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
+import java.io.File
 
 private val LOG = KotlinLogging.logger {}
 
@@ -26,5 +27,15 @@ class DataImportService(
                     LOG.info { "Added text ${it.text()}" }
                 }
             }
+    }
+
+    fun impotyBobRossPaintings(directoryPath: String) {
+        val directory = File(directoryPath)
+        val uris = directory
+            .walk()
+            .filter { it.isFile && it.extension == "png" }
+            .map { it.toURI() }
+            .toList()
+        weaviate.batchAddImages(uris)
     }
 }

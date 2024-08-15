@@ -73,12 +73,6 @@ class VillageService(
         }
     }
 
-    fun villagerChat(firstChatter: String, secondChatter: String): Flow<String> {
-        val firstVillager = villagerRepository.getVillager(firstChatter)
-        val secondVillager = villagerRepository.getVillager(secondChatter)
-        return emptyFlow()
-    }
-
     fun initVillage(): Set<Villager> {
         LOG.info { "initializing village" }
         val allVillagers = villagerRepository.getAllVillagers()
@@ -93,6 +87,7 @@ class VillageService(
 
     fun orcishTranscribe(base64Image: String): Flow<String> {
         LOG.info { "transcribing an image as an orc..." }
+        weaviate.addImage(base64Image)
         val description = transcribe(base64Image)
         return callbackFlow {
             val stream = villagerAssistant.describeArt("Bobhu", description)

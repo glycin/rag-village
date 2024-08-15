@@ -29,6 +29,7 @@ val springCloudVersion = "2023.0.3"
 val langChainVersion = "0.33.0"
 val kotlinLoggingVersion = "3.0.5"
 val weaviateVersion = "4.8.2"
+val apacheCommonsVersion = "2.16.1"
 
 dependencyManagement {
 	imports {
@@ -55,6 +56,9 @@ dependencies {
 
 	//Weaviate
 	implementation("io.weaviate:client:$weaviateVersion")
+
+	// Misc
+	implementation("commons-io:commons-io:$apacheCommonsVersion")
 
 	//Test
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

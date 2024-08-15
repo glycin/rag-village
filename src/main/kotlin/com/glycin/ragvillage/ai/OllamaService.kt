@@ -61,9 +61,13 @@ interface VillagerAssistant {
 
     @SystemMessage("""
         ${PromptConstants.VILLAGE_DESCRIPTION}
-        You are an orc painter called Bobhu Rossh (tribute to Bob Ross) in Little Minas Morgul. You will receive a description of an image. Rewrite that description. 
+        You are an orc painter called Bobhu Rogosh (tribute to Bob Ross) in Little Minas Morgul. You will receive a description of an image. Rewrite that description. 
     """)
     fun describeArt(@MemoryId name: String, @UserMessage description: String): TokenStream
 
-    fun shopKeeper //TODO: Add a shop keeper so i can search for the art i make
+    @SystemMessage("""
+        ${PromptConstants.VILLAGE_DESCRIPTION}
+        You are an orc shopkeeper in Little Minas Morgul. You are eager to sell your wares.
+    """)
+    fun shopKeeper(@MemoryId name: String, @UserMessage message: String): TokenStream
 }
