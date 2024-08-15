@@ -9,7 +9,6 @@ import com.glycin.ragvillage.repositories.WeaviateRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.emptyFlow
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 
@@ -87,14 +86,14 @@ class VillageService(
 
     fun orcishTranscribe(base64Image: String): Flow<String> {
         LOG.info { "transcribing an image as an orc..." }
-        weaviate.addImage(base64Image)
+        //weaviate.addImage(base64Image) TODO: ALSO SAVE THE IMAGE FOR FUTURE USE
         val description = transcribe(base64Image)
         return callbackFlow {
             val stream = villagerAssistant.describeArt("Bobhu", description)
             stream.onNext {
                 trySend(it).isSuccess
             }.onComplete {
-                LOG.info { "completed chat with Bobhu" }
+                LOG.info { "You showed your painting to Bobhu!" }
                 close()
             }.onError { error ->
                 LOG.error { "${error.message}\n${error.stackTrace}" }
@@ -108,6 +107,24 @@ class VillageService(
     fun transcribe(base64Image: String): String {
         LOG.info { "transcribing an image..." }
         return theEye.transcribe(base64Image)
+    }
+
+    fun chatWithBobhu(message:String): Flow<String> {
+        LOG.info { "chatting with the one and only Bobhu Rogosh..." }
+        return callbackFlow {
+            val stream = villagerAssistant.bobhu("Bobhu", message)
+            stream.onNext {
+                trySend(it).isSuccess
+            }.onComplete {
+                LOG.info { "Completed initial chat with Bobhu" }
+                close()
+            }.onError { error ->
+                LOG.error { "${error.message}\n${error.stackTrace}" }
+                close(error)
+            }.start()
+
+            awaitClose { }
+        }
     }
 
     fun ask(q: String): String {

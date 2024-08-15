@@ -9,6 +9,35 @@ Cobblestone paths wind past charming cottages and lead to the bustling village s
         What do you see?
     """
 
+    const val BOBHU_ROGOSH_DESCRIPTION = """
+        In the heart of Little Minas Morgul, amidst the vibrant tapestry of this resilient village, lives Bobhu Rogosh, a renowned orcish painter celebrated for his extraordinary talent and unique perspective. 
+        A tribute to the legendary Bob Ross, Bobhu brings a touch of serenity to the otherwise grim surroundings of Mordor. 
+        With a brushstroke that seems to defy the harsh landscapes of his world, he transforms the village’s rolling hills, verdant meadows, and tranquil streams into stunning works of art. 
+        His paintings capture the essence of hope and beauty in a land overshadowed by darkness, and his calming presence is a cherished fixture in the village square. 
+        Bobhu’s ability to find and portray the splendor in everyday scenes makes him a beloved figure, symbolizing the indomitable spirit of Little Minas Morgul.
+    """
+
+    const val SHOPKEEPER_DESCRIPTION = """
+In the bustling village square of Little Minas Morgul, you'll find the cheerful and ever-enthusiastic shopkeeper, know only as Shopkeeper. 
+His shop, a quaint and cozy spot outside, with many chests around him, is a delightful spot that draws visitors with its warm and inviting atmosphere. 
+Shopkeep’s shop, though modest in size, is brimming with character and charm.
+
+The shop’s primary offerings are the exquisite paintings crafted by the village's beloved artist, Bobhu Rogosh. 
+Shopkeep takes immense pride in showcasing these beautiful works of art, each piece a vivid portrayal of the village's serene landscapes and hopeful spirit. 
+His eagerness to share the beauty of Bobhu’s paintings with every customer is infectious, and he eagerly shares stories behind each piece, explaining how they capture the very essence of Little Minas Morgul.
+
+With a smile that rarely fades and a twinkle in his eye, Shopkeep is always ready to help you find the perfect painting to brighten your home. 
+His boundless enthusiasm and genuine passion for Bobhu’s art make every visit to his shop a delightful experience, a testament to the vibrant community spirit of Little Minas Morgul.
+    """
+
+    const val THE_METALHEAD_DESCRIPTION = """
+In the vibrant village of Little Minas Morgul, where tranquil beauty contrasts with the harshness of the surrounding lands, lives The Metalhead, an orcish power metal musician whose passion for his craft is unmatched. With a larger-than-life personality and a dramatic flair, The Metalhead is a striking figure, easily recognized by his electric attire and the heavy metal paraphernalia that surrounds him.
+
+The Metalhead’s home is a rock-and-roll haven, overflowing with guitars, drums, and a collection of classic metal albums. His walls are adorned with band posters and album covers, reflecting his undying love for the genre. His living space often reverberates with the thunderous beats and soaring solos of his music, creating a unique contrast to the village’s serene environment.
+
+Never one to miss an opportunity, The Metalhead eagerly approaches anyone he meets, offering a chance to hear his latest compositions or an impromptu performance. His fervor for power metal is infectious; whether you’re strolling through the cobblestone paths or enjoying a peaceful moment by the streams, he’ll be there, ready to share his music with a grin and an enthusiastic pitch. His unwavering dedication and vibrant spirit bring a dynamic energy to Little Minas Morgul, making him a beloved and unforgettable presence in the village.
+    """
+
     const val COMMAND_PROMPT = """
 You are managing villagers in Little Minas Morgul, a tranquil village in Mordor. You will receive the following inputs:
 

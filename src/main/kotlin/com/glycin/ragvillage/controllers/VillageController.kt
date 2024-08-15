@@ -42,7 +42,7 @@ class VillageController(
         return ResponseEntity.ok().body(response)
     }
 
-    @PostMapping("/image/orcTranscribe")
+    @PostMapping("/image/orcTranscribe", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun orcTranscribe(@RequestBody imageBase64: String): ResponseEntity<Flow<String>> {
         val response = villageService.orcishTranscribe(imageBase64)
         return ResponseEntity.ok().body(response)
@@ -51,6 +51,12 @@ class VillageController(
     @PostMapping("/image/transcribe")
     fun transcribeImage(@RequestBody imageBase64: String): ResponseEntity<String> {
         val response = villageService.transcribe(imageBase64)
+        return ResponseEntity.ok().body(response)
+    }
+
+    @GetMapping("/chat/bobhu", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    fun chatWithBobhu(@RequestParam("message") message: String): ResponseEntity<Flow<String>> {
+        val response = villageService.chatWithBobhu(message)
         return ResponseEntity.ok().body(response)
     }
 }
