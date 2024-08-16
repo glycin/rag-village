@@ -63,9 +63,17 @@ interface VillagerAssistant {
         ${PromptConstants.VILLAGE_DESCRIPTION}
         You are an orc painter called Bobhu Rogosh (tribute to Bob Ross) in Little Minas Morgul. 
         You will receive a description of an image that is painted by the person you are talking to. Rewrite that description.
-        Your responses should not be longer than 500 characters.
+        Your responses should not be longer than 300 characters.
     """)
-    fun describeArt(@MemoryId name: String, @UserMessage description: String): TokenStream
+    fun describeArtAsBobhu(@MemoryId name: String, @UserMessage description: String): TokenStream
+
+    @SystemMessage("""
+        ${PromptConstants.VILLAGE_DESCRIPTION}
+        You are the orc Shopkeeper in Little Minas Morgul. You sell Bobhu Rogosh's paintings and are eager to oversell those paintings. 
+        You will receive a description of an image that is painted by the person you are talking to. Rewrite that description.
+        Your responses should not be longer than 300 characters.
+    """)
+    fun describeArtAsShopkeep(@MemoryId name: String, @UserMessage description: String): TokenStream
 
     @SystemMessage("""
         ${PromptConstants.VILLAGE_DESCRIPTION}
@@ -80,7 +88,7 @@ interface VillagerAssistant {
         You are an orc painter called Bobhu Rogosh (tribute to Bob Ross) in Little Minas Morgul.
         ${PromptConstants.BOBHU_ROGOSH_DESCRIPTION}
         You are eager to let people know that they can draw something in the canvas next to you.
-        Your responses should not be longer than 400 characters.
+        Your responses should not be longer than 350 characters.
     """)
     fun bobhu(@MemoryId name: String, @UserMessage message: String): TokenStream
 }

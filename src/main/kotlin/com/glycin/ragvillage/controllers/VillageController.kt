@@ -1,7 +1,9 @@
 package com.glycin.ragvillage.controllers
 
+import com.glycin.ragvillage.model.ImageBody
 import com.glycin.ragvillage.model.Villager
 import com.glycin.ragvillage.model.VillagerCommand
+import com.glycin.ragvillage.repositories.WeaviateRepository
 import com.glycin.ragvillage.services.VillageService
 import kotlinx.coroutines.flow.Flow
 import mu.KotlinLogging
@@ -15,6 +17,7 @@ private val LOG = KotlinLogging.logger {}
 @RequestMapping("/api/village")
 class VillageController(
     val villageService: VillageService,
+    val weaviateRepository: WeaviateRepository,
 ) {
 
     @GetMapping("/command")
@@ -43,14 +46,20 @@ class VillageController(
     }
 
     @PostMapping("/image/orcTranscribe", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
-    fun orcTranscribe(@RequestBody imageBase64: String): ResponseEntity<Flow<String>> {
-        val response = villageService.orcishTranscribe(imageBase64)
+    fun orcTranscribe(@RequestBody image: ImageBody): ResponseEntity<Flow<String>> {
+        val response = villageService.orcishTranscribe(image.image, image.name)
         return ResponseEntity.ok().body(response)
     }
 
     @PostMapping("/image/transcribe")
-    fun transcribeImage(@RequestBody imageBase64: String): ResponseEntity<String> {
-        val response = villageService.transcribe(imageBase64)
+    fun transcribeImage(@RequestBody imageBase64: ImageBody): ResponseEntity<String> {
+        val response = villageService.transcribe(imageBase64.image)
+        return ResponseEntity.ok().body(response)
+    }
+
+    @GetMapping("/image")
+    fun getImage(@RequestParam("message") message: String): ResponseEntity<String> {
+        val response = weaviateRepository.searchImageNearText(message)
         return ResponseEntity.ok().body(response)
     }
 

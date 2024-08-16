@@ -13,8 +13,6 @@ import org.apache.commons.io.FileUtils
 import org.springframework.stereotype.Repository
 import java.io.File
 import java.net.URI
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.*
 
 private val LOG = KotlinLogging.logger {}
@@ -47,8 +45,34 @@ class WeaviateRepository {
 
         return objectMapper.writeValueAsString(result.result.data).let { json ->
             objectMapper.readValue(json, Data::class.java).let { data ->
-                data.get.simpleText.map { it.text }
+                data.get.simpleText?.let { simpleText ->
+                    simpleText.map { it.text }
+                } ?: emptyList()
             }
+        }
+    }
+
+    fun searchImageNearText(text: String): String {
+        val result = client.graphQL()
+            .get()
+            .withClassName(WeaviateClassNames.STANDARD_MULTI_MODAL)
+            .withNearText(
+                NearTextArgument.builder()
+                    .concepts(arrayOf(text))
+                    .distance(0.9f)
+                    .build()
+            )
+            .withLimit(1)
+            .withFields(Field.builder().name("image").build())
+            .run()
+
+        if(result.hasErrors()) {
+            LOG.error{ "Could not search for ${WeaviateClassNames.SIMPLE_TEXT} and text: $text" }
+            return ""
+        }
+
+        return objectMapper.writeValueAsString(result.result.data).let { json ->
+            objectMapper.readValue(json, Data::class.java).get.standardMultimodal?.firstOrNull()?.image ?: ""
         }
     }
 

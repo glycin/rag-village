@@ -16,9 +16,9 @@ import org.springframework.stereotype.Service
 
 private val LOG = KotlinLogging.logger {}
 
-private const val BOBHU = "Bobhu"
-private const val SHOPKEEP = "Shopkeeper"
-private const val THE_METALHEAD = "TheMetalhead"
+private const val BOBHU = "BOBHU"
+private const val SHOPKEEP = "SHOPKEEPER"
+private const val THE_METALHEAD = "THEMETALHEAD"
 
 @Service
 class VillageService(
@@ -77,12 +77,29 @@ class VillageService(
         return villagerRepository.getAllVillagers()
     }
 
-    fun orcishTranscribe(base64Image: String): Flow<String> {
+    fun orcishTranscribe(base64Image: String, orcName: String): Flow<String> {
         LOG.info { "transcribing an image as an orc..." }
-        //weaviate.addImage(base64Image) TODO: ALSO SAVE THE IMAGE FOR FUTURE USE
-        val description = transcribe(base64Image)
-        return chatFlow("You showed your painting to Bobhu!") {
-            villagerAssistant.describeArt(BOBHU, description)
+        LOG.info { "IMAGE ${base64Image}" }
+        return when(orcName.uppercase()) {
+            SHOPKEEP -> {
+                val description = theEye.transcribe(base64Image)
+                chatFlow("The shopkeep is selling you a painting!") {
+                    villagerAssistant.describeArtAsShopkeep(BOBHU, description)
+                }
+            }
+            BOBHU -> {
+                //weaviate.addImage(base64Image) //TODO: ENABLE THIS AGAIN
+                val description = theEye.transcribe(base64Image)
+                chatFlow("You showed your painting to Bobhu!") {
+                    villagerAssistant.describeArtAsBobhu(BOBHU, description)
+                }
+            }
+            else -> {
+                val description = theEye.transcribe(base64Image)
+                chatFlow("You showed your painting to Bobhu!") {
+                    villagerAssistant.describeArtAsBobhu(BOBHU, description)
+                }
+            }
         }
     }
 
