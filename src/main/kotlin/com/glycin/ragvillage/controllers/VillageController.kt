@@ -59,4 +59,10 @@ class VillageController(
         val response = villageService.chatWithBobhu(message)
         return ResponseEntity.ok().body(response)
     }
+
+    @GetMapping("/chat/shopkeep", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    fun chatWithShopkeep(@RequestParam("message") message: String): ResponseEntity<Flow<String>> {
+        val response = villageService.chatWithShopkeep(message)
+        return ResponseEntity.ok().body(response)
+    }
 }

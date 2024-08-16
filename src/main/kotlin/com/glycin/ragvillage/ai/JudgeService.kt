@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service
 class JudgeService(
     private val config: OllamaServiceConfiguration,
 ){
-    lateinit var judgement: AiJudge
+    lateinit var commandJudgment: CommandJudge
+    lateinit var questionJudgment: QuestionJudge
+    fun initJudgement(villagers: List<String>, locations: Set<String>) {
 
-    fun initAssistant(villagers: List<String>, locations: Set<String>) {
-
-        judgement = AiServices.builder(AiJudge::class.java)
+        commandJudgment = AiServices.builder(CommandJudge::class.java)
             .chatLanguageModel(
                 OllamaChatModel.builder()
                     .logRequests(config.logRequests)
@@ -43,10 +43,35 @@ class JudgeService(
                 """.trimIndent()
             }
             .build()
+
+        questionJudgment = AiServices.builder(QuestionJudge::class.java)
+            .chatLanguageModel(
+                OllamaChatModel.builder()
+                    .logRequests(config.logRequests)
+                    .logResponses(config.logResponses)
+                    .baseUrl(config.url)
+                    .modelName(config.modelName)
+                    .temperature(config.temperature)
+                    .build()
+            )
+            .chatMemoryProvider {
+                MessageWindowChatMemory.withMaxMessages(2) // TODO: DO NET SET THIS TO 1, IT WILL REMOVE THE USER MESSAGE IF U ALSO HAVE A SYSTEM MESSAGE
+            }.systemMessageProvider {
+                """
+                You are tasked to analyze the message you receive and extract the type of question from it.
+                Use one of the following question types: ${QuestionType.entries.joinToString()}.
+                Return ONLY the question type and nothing else. Do not wrap your response in quotes or in json.
+                """.trimIndent()
+            }
+            .build()
     }
 }
 
 
-interface AiJudge {
+interface CommandJudge {
     fun judgeCommand (@UserMessage messageToBeJudge: String) : VillagerCommand
+}
+
+interface QuestionJudge{
+    fun judgeQuestion(@UserMessage messageToBeJudge: String) : String
 }

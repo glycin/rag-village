@@ -3,9 +3,11 @@ package com.glycin.ragvillage.services
 import com.glycin.ragvillage.ai.JudgeService
 import com.glycin.ragvillage.ai.OllamaService
 import com.glycin.ragvillage.ai.OllamaVisionService
+import com.glycin.ragvillage.ai.QuestionType
 import com.glycin.ragvillage.model.*
 import com.glycin.ragvillage.repositories.VillagerRepository
 import com.glycin.ragvillage.repositories.WeaviateRepository
+import dev.langchain4j.service.TokenStream
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -13,6 +15,10 @@ import mu.KotlinLogging
 import org.springframework.stereotype.Service
 
 private val LOG = KotlinLogging.logger {}
+
+private const val BOBHU = "Bobhu"
+private const val SHOPKEEP = "Shopkeeper"
+private const val THE_METALHEAD = "TheMetalhead"
 
 @Service
 class VillageService(
@@ -32,7 +38,7 @@ class VillageService(
 
         val potentialCommand = villagerAssistant.commandVillager(villager.name, VillagerCommandPrompt(villager.toPrompt(), villageState))
         LOG.info { potentialCommand }
-        val command = judge.judgement.judgeCommand(potentialCommand)
+        val command = judge.commandJudgment.judgeCommand(potentialCommand)
 
         if(command.wait) {
             villager.state = VillagerState.IDLE
@@ -54,21 +60,8 @@ class VillageService(
         val villager = villagerRepository.getVillager(name)
         val context = weaviate.searchForSimpleText(message)
 
-        return callbackFlow {
-            val stream = villagerAssistant.chat(villager.name, VillagerChatPrompt(villager,context, message))
-            stream.onNext {
-                trySend(it).isSuccess
-            }.onComplete {
-                LOG.info { "completed chat with $name" }
-                close()
-            }.onError { error ->
-                LOG.error { "${error.message}\n${error.stackTrace}" }
-                close(error)
-            }.start()
-
-            awaitClose {
-                // TODO: Necessary to do any cleanup?
-            }
+        return chatFlow("Completed chat with $name") {
+            villagerAssistant.chat(villager.name, VillagerChatPrompt(villager,context, message))
         }
     }
 
@@ -80,7 +73,7 @@ class VillageService(
             VillageLocation.entries.map { it.name }.toSet(),
             "10:00",
         )
-        judge.initAssistant(allVillagers.map { v -> v.toPrompt() }.toList(), villageState.villageLocations)
+        judge.initJudgement(allVillagers.map { v -> v.toPrompt() }.toList(), villageState.villageLocations)
         return villagerRepository.getAllVillagers()
     }
 
@@ -88,19 +81,8 @@ class VillageService(
         LOG.info { "transcribing an image as an orc..." }
         //weaviate.addImage(base64Image) TODO: ALSO SAVE THE IMAGE FOR FUTURE USE
         val description = transcribe(base64Image)
-        return callbackFlow {
-            val stream = villagerAssistant.describeArt("Bobhu", description)
-            stream.onNext {
-                trySend(it).isSuccess
-            }.onComplete {
-                LOG.info { "You showed your painting to Bobhu!" }
-                close()
-            }.onError { error ->
-                LOG.error { "${error.message}\n${error.stackTrace}" }
-                close(error)
-            }.start()
-
-            awaitClose { }
+        return chatFlow("You showed your painting to Bobhu!") {
+            villagerAssistant.describeArt(BOBHU, description)
         }
     }
 
@@ -111,12 +93,48 @@ class VillageService(
 
     fun chatWithBobhu(message:String): Flow<String> {
         LOG.info { "chatting with the one and only Bobhu Rogosh..." }
+        return chatFlow("Completed initial chat with Bobhu") {
+            villagerAssistant.bobhu(BOBHU, message)
+        }
+    }
+
+    fun chatWithShopkeep(message:String): Flow<String> {
+        if(!this::villageState.isInitialized) { initVillage() }
+        LOG.info { "Chatting with the shopkeeper" }
+        val questionType = QuestionType.fromValueOrDefault(judge.questionJudgment.judgeQuestion(message))
+        LOG.info { "Received a $questionType question" }
+        val newMessage = when (questionType) {
+            QuestionType.CHAT -> message
+            QuestionType.HISTORY -> message // TODO: Do weaviate call to find context
+            QuestionType.SHOPPING -> "This is the message you received: $message. Let the customer know you only have paintings"
+            QuestionType.SHOPPING_PAINTING -> """
+                The customer wants some paintings. Ask the customer, enthusiastically, what kind of painting he is looking for!
+                The final word of your response should always be "KACHING".
+            """.trimIndent()
+        }
+        return chatFlow("Completed chat with the shopkeeper") {
+            villagerAssistant.shopKeeper(SHOPKEEP, newMessage)
+        }
+    }
+
+    fun shopPainting() {
+
+    }
+
+    fun ask(q: String): String {
+        return villagerAssistant.ask(q)
+    }
+
+    private fun chatFlow(
+        onCompleteMessage: String,
+        streamProvider: () -> TokenStream,
+    ): Flow<String> {
         return callbackFlow {
-            val stream = villagerAssistant.bobhu("Bobhu", message)
+            val stream = streamProvider()
             stream.onNext {
                 trySend(it).isSuccess
             }.onComplete {
-                LOG.info { "Completed initial chat with Bobhu" }
+                LOG.info { onCompleteMessage }
                 close()
             }.onError { error ->
                 LOG.error { "${error.message}\n${error.stackTrace}" }
@@ -125,9 +143,5 @@ class VillageService(
 
             awaitClose { }
         }
-    }
-
-    fun ask(q: String): String {
-        return villagerAssistant.ask(q)
     }
 }
