@@ -1,6 +1,7 @@
 package com.glycin.ragvillage.services
 
 import com.glycin.ragvillage.ai.LilMinasMorgulTextSegmentTransformer
+import com.glycin.ragvillage.clients.AudioServerClient
 import com.glycin.ragvillage.repositories.WeaviateRepository
 import dev.langchain4j.data.document.loader.FileSystemDocumentLoader
 import dev.langchain4j.data.document.parser.TextDocumentParser
@@ -13,7 +14,8 @@ private val LOG = KotlinLogging.logger {}
 
 @Service
 class DataImportService(
-    private val weaviate: WeaviateRepository
+    private val weaviate: WeaviateRepository,
+    private val audioServerClient: AudioServerClient,
 ) {
 
     fun importTextChunk() {
@@ -29,7 +31,8 @@ class DataImportService(
             }
     }
 
-    fun impotyBobRossPaintings(directoryPath: String) {
+    fun importBobRossPaintings(directoryPath: String) {
+        LOG.info { "Loading in bob ross paintings" }
         val directory = File(directoryPath)
         val uris = directory
             .walk()
@@ -37,5 +40,22 @@ class DataImportService(
             .map { it.toURI() }
             .toList()
         weaviate.batchAddImages(uris)
+        LOG.info { "Finished loading in bob ross paintings" }
+    }
+
+    fun importAudioFiles(directoryPath: String) {
+        LOG.info { "Loading in audio files..." }
+        val directory = File(directoryPath)
+        val uris = directory
+            .walk()
+            .filter { it.isFile && it.extension == "wav" || it.extension == "mp3" }
+            .associate { it.name to it.toURI() }
+        uris.forEach { uri ->
+            LOG.info { "Getting vectors for ${uri.value.path}" }
+            val embedding = audioServerClient.getAudioEmbedding(uri.value.path.trimStart('/'))
+            LOG.info { "Vector with dimensionality of ${embedding.embedding.size} retrieved, saving ${uri.key} to db..." }
+            weaviate.addVector(uri.key, embedding.embedding)
+        }
+        LOG.info { "Finished loading in audio files" }
     }
 }

@@ -5,7 +5,7 @@ from msclap import CLAP
 clap_model = CLAP(version = '2023', use_cuda=True)
 
 testText = ["An heavy metal song."]
-filepath = ['C:\\Users\\lorda\\Downloads\\BEAST_IN_BLACK-PowerOfTheBeast.mp3']
+filepath = ['C:\\Projects\\rag-village-data\\audio\\simple-loopable-beat.wav']
 
 # Extract text embeddings
 text_embeddings = clap_model.get_text_embeddings(testText)
@@ -20,10 +20,10 @@ print(f"{similarities}")
 print("Trying out captioning")
 caption_model = CLAP(version = 'clapcap', use_cuda=True)
 
-audio_files = ['C:\\Users\\lorda\\Downloads\\FROSTBITE_ORCKINGS-Bye_Bye_Wintertime.mp3',
-               'C:\\Users\\lorda\\Downloads\\Beethoven-FurElise.mp3',
-               'C:\\Users\\lorda\\Downloads\\Eminem-Houdini.mp3',
-               'C:\\Users\\lorda\\Downloads\\BEAST_IN_BLACK-PowerOfTheBeast.mp3']
+audio_files = ['C:\\Projects\\rag-village-data\\audio\\simple-loopable-beat.wav',
+               'C:\\Projects\\rag-village-data\\audio\\wingrandpiano.wav',
+               'C:\\Projects\\rag-village-data\\audio\\Sad-Violin-A.wav',
+               'C:\\Projects\\rag-village-data\\audio\\metal.00004.wav']
 
 captions = caption_model.generate_caption(audio_files, resample=True, beam_size=5, entry_length=67, temperature=0.7)
 

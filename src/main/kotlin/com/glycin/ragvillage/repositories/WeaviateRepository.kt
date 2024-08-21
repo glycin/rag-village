@@ -7,6 +7,7 @@ import io.weaviate.client.Config
 import io.weaviate.client.WeaviateClient
 import io.weaviate.client.v1.data.model.WeaviateObject
 import io.weaviate.client.v1.graphql.query.argument.NearTextArgument
+import io.weaviate.client.v1.graphql.query.argument.NearVectorArgument
 import io.weaviate.client.v1.graphql.query.fields.Field
 import mu.KotlinLogging
 import org.apache.commons.io.FileUtils
@@ -30,7 +31,7 @@ class WeaviateRepository {
             .withNearText(
                 NearTextArgument.builder()
                     .concepts(arrayOf(text))
-                    .distance(0.75f)
+                    .distance(0.55f)
                     .build()
             )
             .withLimit(5)
@@ -76,6 +77,28 @@ class WeaviateRepository {
         }
     }
 
+    fun searchVector(inputVector: List<Float>): String {
+        val result = client.graphQL()
+            .get()
+            .withClassName(WeaviateClassNames.VECTOR_ONLY)
+            .withNearVector(NearVectorArgument.builder()
+                .vector(inputVector.toTypedArray())
+                .distance(0.9f)
+                .build())
+            .withLimit(1)
+            .withFields(Field.builder().name("label").build())
+            .run()
+
+        if(result.hasErrors()) {
+            LOG.error{ "Could not search for ${WeaviateClassNames.VECTOR_ONLY}" }
+            return ""
+        }
+
+        return objectMapper.writeValueAsString(result.result.data).let { json ->
+            objectMapper.readValue(json, Data::class.java).get.vectorOnly?.firstOrNull()?.label ?: ""
+        }
+    }
+
     fun addSimpleText(text: String): Boolean {
         if(!client.hasSchemaWithName(WeaviateClassNames.SIMPLE_TEXT)) {
             LOG.info { "No schema ${WeaviateClassNames.SIMPLE_TEXT} exists!" }
@@ -111,7 +134,7 @@ class WeaviateRepository {
             .run()
             .let {
                 if(it.hasErrors()) {
-                    LOG.error { "Couldn't add ${WeaviateClassNames.SIMPLE_TEXT} because of ${it.error}" }
+                    LOG.error { "Couldn't add ${WeaviateClassNames.STANDARD_MULTI_MODAL} because of ${it.error}" }
                     false
                 }else {
                     true
@@ -149,5 +172,28 @@ class WeaviateRepository {
         val result = batcher.run()
         LOG.info { "DONE!" }
         return !result.hasErrors()
+    }
+
+    fun addVector(label: String, vector: List<Float>): Boolean {
+        if(!client.hasSchemaWithName(WeaviateClassNames.VECTOR_ONLY)) {
+            LOG.info { "No schema ${WeaviateClassNames.VECTOR_ONLY} exists!" }
+            return false
+        }
+
+        val properties = mapOf("label" to label)
+
+        return client.data().creator()
+            .withClassName(WeaviateClassNames.VECTOR_ONLY)
+            .withProperties(properties)
+            .withVector(vector.toTypedArray())
+            .run()
+            .let {
+                if(it.hasErrors()) {
+                    LOG.error { "Couldn't add ${WeaviateClassNames.VECTOR_ONLY} because of ${it.error}" }
+                    false
+                }else {
+                    true
+                }
+            }
     }
 }

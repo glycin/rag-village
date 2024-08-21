@@ -63,6 +63,12 @@ class VillageController(
         return ResponseEntity.ok().body(response)
     }
 
+    @GetMapping("/audio")
+    fun getAudioFilename(@RequestParam("message") message: String): ResponseEntity<String> {
+        val response = villageService.searchForAudio(message)
+        return ResponseEntity.ok().body(response)
+    }
+
     @GetMapping("/chat/bobhu", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun chatWithBobhu(@RequestParam("message") message: String): ResponseEntity<Flow<String>> {
         val response = villageService.chatWithBobhu(message)

@@ -19,6 +19,11 @@ class DataImportController(
 
     @PostMapping("bobRoss")
     fun importBobRoss(@RequestParam dirPath: String) {
-        importService.impotyBobRossPaintings(dirPath)
+        importService.importBobRossPaintings(dirPath)
+    }
+
+    @PostMapping("audio")
+    fun importAudio(@RequestParam dirPath: String) {
+        importService.importAudioFiles(dirPath)
     }
 }

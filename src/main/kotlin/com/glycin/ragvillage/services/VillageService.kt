@@ -4,6 +4,7 @@ import com.glycin.ragvillage.ai.JudgeService
 import com.glycin.ragvillage.ai.OllamaService
 import com.glycin.ragvillage.ai.OllamaVisionService
 import com.glycin.ragvillage.ai.QuestionType
+import com.glycin.ragvillage.clients.AudioServerClient
 import com.glycin.ragvillage.model.*
 import com.glycin.ragvillage.repositories.VillagerRepository
 import com.glycin.ragvillage.repositories.WeaviateRepository
@@ -27,6 +28,7 @@ class VillageService(
     private val judge: JudgeService,
     private val villagerRepository: VillagerRepository,
     private val weaviate: WeaviateRepository,
+    private val audioServerClient: AudioServerClient,
 ) {
 
     private val villagerAssistant = ollama.villagerAssistant
@@ -106,6 +108,13 @@ class VillageService(
     fun transcribe(base64Image: String): String {
         LOG.info { "transcribing an image..." }
         return theEye.transcribe(base64Image)
+    }
+
+    fun searchForAudio(message: String): String {
+        LOG.info { "getting audio embeddings for text..." }
+        val textAudioEmbeddings = audioServerClient.getTextEmbedding(message)
+        LOG.info { "found embeddings, querying weaviate for audio" }
+        return weaviate.searchVector(textAudioEmbeddings.embedding)
     }
 
     fun chatWithBobhu(message:String): Flow<String> {

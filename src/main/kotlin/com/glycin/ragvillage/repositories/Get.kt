@@ -13,11 +13,19 @@ data class Get(
 
     @JsonProperty("StandardMultimodal")
     val standardMultimodal: List<StandardMultimodal>?,
+
+    @JsonProperty("VectorOnly")
+    val vectorOnly: List<VectorOnly>?,
 )
 
 data class SimpleText(
     @JsonProperty("text")
     val text: String
+)
+
+data class VectorOnly(
+    @JsonProperty("label")
+    val label: String,
 )
 
 data class StandardMultimodal(
