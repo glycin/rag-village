@@ -80,4 +80,16 @@ class VillageController(
         val response = villageService.chatWithShopkeep(message)
         return ResponseEntity.ok().body(response)
     }
+
+    @GetMapping("/chat/metalhead", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    fun chatWithTheMetalhead(@RequestParam("message") message: String): ResponseEntity<Flow<String>> {
+        val response = villageService.chatWithTheMetalhead(message)
+        return ResponseEntity.ok().body(response)
+    }
+
+    @GetMapping("/chat/metalhead/sing", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    fun metalheadSinger(@RequestParam("message") message: String, @RequestParam("clipName") clipName: String): ResponseEntity<Flow<String>> {
+        val response = villageService.createLyricsForAudio(message, clipName)
+        return ResponseEntity.ok().body(response)
+    }
 }

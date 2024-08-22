@@ -137,14 +137,41 @@ class VillageService(
                 The customer wants some paintings. Ask the customer, enthusiastically, what kind of painting he is looking for!
                 The final word of your response should always be "KACHING".
             """.trimIndent()
+            else -> message
         }
         return chatFlow("Completed chat with the shopkeeper") {
             villagerAssistant.shopKeeper(SHOPKEEP, newMessage)
         }
     }
 
-    fun shopPainting() {
+    fun chatWithTheMetalhead(message: String): Flow<String> {
+        if(!this::villageState.isInitialized) { initVillage() }
+        LOG.info { "Chatting with the metalhead" }
+        val questionType = QuestionType.fromValueOrDefault(judge.questionJudgment.judgeQuestion(message))
+        LOG.info { "Received a $questionType question" }
+        val newMessage = when (questionType) {
+            QuestionType.CHAT -> message
+            QuestionType.MUSIC -> """
+                The person you are talkin to wants to hear some music! Ask them, what kind of music they want to hear!
+                The final word of your response should always be "BRUTAL".
+            """.trimIndent()
+            else -> message
+        }
+        return chatFlow("Completed chat with the metalhead") {
+            villagerAssistant.metalhead(THE_METALHEAD, newMessage)
+        }
+    }
 
+    fun createLyricsForAudio(message: String, clipName: String): Flow<String> {
+        if(!this::villageState.isInitialized) { initVillage() }
+        LOG.info { "Metalhead is singing for you" }
+        val newMessage = """
+            You, the Metalhead, are playing a song for the user that is matching the following description: $message. The name of the song is $clipName
+            Generate lyrics that match that song that fit your character!
+        """.trimIndent()
+        return chatFlow("Completed chat with the metalhead") {
+            villagerAssistant.metalhead(THE_METALHEAD, newMessage)
+        }
     }
 
     fun ask(q: String): String {

@@ -4,6 +4,7 @@ enum class QuestionType {
     CHAT,
     SHOPPING,
     SHOPPING_PAINTING,
+    MUSIC,
     HISTORY;
 
     companion object {
