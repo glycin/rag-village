@@ -81,7 +81,6 @@ class VillageService(
 
     fun orcishTranscribe(base64Image: String, orcName: String): Flow<String> {
         LOG.info { "transcribing an image as an orc..." }
-        LOG.info { "IMAGE ${base64Image}" }
         return when(orcName.uppercase()) {
             SHOPKEEP -> {
                 val description = theEye.transcribe(base64Image)
@@ -90,7 +89,7 @@ class VillageService(
                 }
             }
             BOBHU -> {
-                //weaviate.addImage(base64Image) //TODO: ENABLE THIS AGAIN
+                weaviate.addImage(base64Image)
                 val description = theEye.transcribe(base64Image)
                 chatFlow("You showed your painting to Bobhu!") {
                     villagerAssistant.describeArtAsBobhu(BOBHU, description)
