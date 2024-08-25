@@ -85,7 +85,7 @@ class VillageService(
             SHOPKEEP -> {
                 val description = theEye.transcribe(base64Image)
                 chatFlow("The shopkeep is selling you a painting!") {
-                    villagerAssistant.describeArtAsShopkeep(BOBHU, description)
+                    villagerAssistant.describeArtAsShopkeep(SHOPKEEP, description)
                 }
             }
             BOBHU -> {

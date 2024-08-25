@@ -6,6 +6,7 @@ import com.glycin.ragvillage.utils.hasSchemaWithName
 import io.weaviate.client.Config
 import io.weaviate.client.WeaviateClient
 import io.weaviate.client.v1.data.model.WeaviateObject
+import io.weaviate.client.v1.graphql.query.argument.NearImageArgument
 import io.weaviate.client.v1.graphql.query.argument.NearTextArgument
 import io.weaviate.client.v1.graphql.query.argument.NearVectorArgument
 import io.weaviate.client.v1.graphql.query.fields.Field
@@ -68,7 +69,31 @@ class WeaviateRepository {
             .run()
 
         if(result.hasErrors()) {
-            LOG.error{ "Could not search for ${WeaviateClassNames.SIMPLE_TEXT} and text: $text" }
+            LOG.error{ "Could not search for ${WeaviateClassNames.STANDARD_MULTI_MODAL} and text: $text" }
+            return ""
+        }
+
+        return objectMapper.writeValueAsString(result.result.data).let { json ->
+            objectMapper.readValue(json, Data::class.java).get.standardMultimodal?.firstOrNull()?.image ?: ""
+        }
+    }
+
+    fun searchImageNearImage(image: String): String {
+        LOG.info { "Searching for image near" }
+        val result = client.graphQL()
+            .get()
+            .withClassName(WeaviateClassNames.STANDARD_MULTI_MODAL)
+            .withNearImage(NearImageArgument.builder()
+                .image(image)
+                .distance(0.9f)
+                .build()
+            )
+            .withLimit(1)
+            .withFields(Field.builder().name("image").build())
+            .run()
+
+        if(result.hasErrors()) {
+            LOG.error{ "Could not search for ${WeaviateClassNames.STANDARD_MULTI_MODAL} with an image..." }
             return ""
         }
 

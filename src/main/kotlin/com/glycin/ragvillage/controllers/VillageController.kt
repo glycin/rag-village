@@ -63,6 +63,12 @@ class VillageController(
         return ResponseEntity.ok().body(response)
     }
 
+    @PostMapping("/image/withImage")
+    fun getImageWithImage(@RequestBody imageBase64: ImageBody): ResponseEntity<String> {
+        val response = weaviateRepository.searchImageNearImage(imageBase64.image)
+        return ResponseEntity.ok().body(response)
+    }
+
     @GetMapping("/audio")
     fun getAudioFilename(@RequestParam("message") message: String): ResponseEntity<String> {
         val response = villageService.searchForAudio(message)

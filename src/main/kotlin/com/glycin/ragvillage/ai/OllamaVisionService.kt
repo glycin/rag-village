@@ -25,7 +25,6 @@ class OllamaVisionService(
                 .build()
 
     fun transcribe(image: String): String {
-        LOG.info { image }
         return vision.generate(getVisionUserMessage(image)).content().text()
     }
 

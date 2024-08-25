@@ -38,7 +38,7 @@ class OllamaService(
                 .build()
         )
         .chatMemoryProvider { memoryId ->
-            MessageWindowChatMemory.withMaxMessages(50)
+            MessageWindowChatMemory.withMaxMessages(20)
         }
         .build()
 }
