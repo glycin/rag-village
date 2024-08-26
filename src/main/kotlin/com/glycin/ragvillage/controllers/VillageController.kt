@@ -32,6 +32,23 @@ class VillageController(
         return ResponseEntity.ok().body(response)
     }
 
+    @GetMapping("/chat/betweenVillagers")
+    fun chatBetweenVillagers(@RequestParam("firstVillager") firstVillager: String,
+                             @RequestParam("secondVillager") secondVillager: String,
+                             @RequestParam("message") message: String
+    ): ResponseEntity<String> {
+        val response = villageService.chatBetween(firstVillager, secondVillager, message)
+        return ResponseEntity.ok().body(response)
+    }
+
+    @GetMapping("/chat/getQuestion")
+    fun chatBetweenVillagers(@RequestParam("firstVillager") firstVillager: String,
+                             @RequestParam("secondVillager") secondVillager: String,
+    ): ResponseEntity<String> {
+        val response = villageService.getQuestion(firstVillager, secondVillager)
+        return ResponseEntity.ok().body(response)
+    }
+
     @GetMapping("/init")
     fun initVillage(): ResponseEntity<Set<Villager>> {
         val response = villageService.initVillage()

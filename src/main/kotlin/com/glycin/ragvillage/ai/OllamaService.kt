@@ -1,6 +1,8 @@
 package com.glycin.ragvillage.ai
 
 import com.glycin.ragvillage.ai.configuration.OllamaServiceConfiguration
+import com.glycin.ragvillage.model.BetweenVillagersChatPrompt
+import com.glycin.ragvillage.model.GenerateQuestionPrompt
 import com.glycin.ragvillage.model.VillagerChatPrompt
 import com.glycin.ragvillage.model.VillagerCommandPrompt
 import com.glycin.ragvillage.utils.PromptConstants
@@ -54,10 +56,30 @@ interface VillagerAssistant {
         ${PromptConstants.VILLAGE_DESCRIPTION}
         You will receive some context in the Context field within the json you will receive.
         You are the villager within little minas morgul as described in the Villager object within the json you will receive. Answer the question within the question field in the json. 
-        Answer the question by fully adapting the personality, age and the state of the villager. Your answer should not be longer than 300 characters.
+        Answer the question by fully adapting the personality, age and the state of the villager and using the context you receive. 
+        Your answer should not be longer than 300 characters.
         Do not wrap the answer in a json or in quotation marks.
     """)
     fun chat(@MemoryId name: String, @UserMessage villagerPrompt: VillagerChatPrompt): TokenStream
+
+    @SystemMessage("""
+        ${PromptConstants.VILLAGE_DESCRIPTION}
+        You are a villager within little minas morgul. You are the villager as defined in the `to` field within the json you will receive.
+        Answer the question by fully adapting the personality, age, state and the context you will receive.
+        The questions you receive are from the villager defined in the `from` field in the `BetweenVillagersChatPrompt` json.
+        Your answer should not be longer than 300 characters.
+        Do not wrap the answer in a json or in quotation marks.
+    """)
+    fun chatBetween(@MemoryId name: String, @UserMessage prompt: BetweenVillagersChatPrompt): String
+
+    @SystemMessage("""
+        ${PromptConstants.VILLAGE_DESCRIPTION}
+        You are the villager within little minas morgul defined in the `from` field within the json you will receive.
+        Generate a question you would ask to the villager defined in the `to` field within the json. The question should be in first person.
+        Your answer should not be longer than 300 characters.
+        Do not wrap the answer in a json or in quotation marks.
+    """)
+    fun getQuestion(@MemoryId name: String, @UserMessage prompt: GenerateQuestionPrompt): String
 
     @SystemMessage("""
         ${PromptConstants.VILLAGE_DESCRIPTION}

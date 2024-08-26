@@ -37,7 +37,7 @@ class VillageService(
     fun commandVillager(name: String): VillagerCommand {
         if(!this::villageState.isInitialized) { initVillage() }
         val villager = villagerRepository.getVillager(name)
-
+        LOG.info { "Commanding $name" }
         val potentialCommand = villagerAssistant.commandVillager(villager.name, VillagerCommandPrompt(villager.toPrompt(), villageState))
         LOG.info { potentialCommand }
         val command = judge.commandJudgment.judgeCommand(potentialCommand)
@@ -65,6 +65,27 @@ class VillageService(
         return chatFlow("Completed chat with $name") {
             villagerAssistant.chat(villager.name, VillagerChatPrompt(villager,context, message))
         }
+    }
+
+    fun chatBetween(first: String, second: String, message: String): String {
+        if(!this::villageState.isInitialized) { initVillage() }
+        LOG.info { "Chatting between $first and $second" }
+
+        val from = villagerRepository.getVillager(first)
+        val to = villagerRepository.getVillager(second)
+        val context = weaviate.searchForSimpleText(message)
+        val prompt = BetweenVillagersChatPrompt(from, to, context, message)
+        return villagerAssistant.chatBetween(from.name, prompt)
+    }
+
+    fun getQuestion(first: String, second: String): String {
+        if(!this::villageState.isInitialized) { initVillage() }
+        LOG.info { "Getting question for $first addressed to $second" }
+
+        val from = villagerRepository.getVillager(first)
+        val to = villagerRepository.getVillager(second)
+        val prompt = GenerateQuestionPrompt(from, to)
+        return villagerAssistant.getQuestion(from.name, prompt)
     }
 
     fun initVillage(): Set<Villager> {
@@ -166,7 +187,7 @@ class VillageService(
         LOG.info { "Metalhead is singing for you" }
         val newMessage = """
             You, the Metalhead, are playing a song for the user that is matching the following description: $message. The name of the song is $clipName
-            Generate lyrics that match that song that fit your character!
+            Generate lyrics that match that song that fit your character! Keep the lyrics short, to one verse and a chorus.
         """.trimIndent()
         return chatFlow("Completed chat with the metalhead") {
             villagerAssistant.metalhead(THE_METALHEAD, newMessage)
