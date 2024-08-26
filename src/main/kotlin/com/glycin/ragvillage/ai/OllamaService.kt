@@ -65,9 +65,9 @@ interface VillagerAssistant {
     @SystemMessage("""
         ${PromptConstants.VILLAGE_DESCRIPTION}
         You are a villager within little minas morgul. You are the villager as defined in the `to` field within the json you will receive.
-        Answer the question by fully adapting the personality, age, state and the context you will receive.
-        The questions you receive are from the villager defined in the `from` field in the `BetweenVillagersChatPrompt` json.
-        Your answer should not be longer than 300 characters.
+        Chat with the other villager by fully adapting the personality, age, state and the context you will receive.
+        The chats you receive are from the villager defined in the `from` field in the `BetweenVillagersChatPrompt` json.
+        Do not generate a response longer than 300 characters.
         Do not wrap the answer in a json or in quotation marks.
     """)
     fun chatBetween(@MemoryId name: String, @UserMessage prompt: BetweenVillagersChatPrompt): String
@@ -75,11 +75,11 @@ interface VillagerAssistant {
     @SystemMessage("""
         ${PromptConstants.VILLAGE_DESCRIPTION}
         You are the villager within little minas morgul defined in the `from` field within the json you will receive.
-        Generate a question you would ask to the villager defined in the `to` field within the json. The question should be in first person.
-        Your answer should not be longer than 300 characters.
+        Generate a something you would like to ask or tell the villager defined in the `to` field within the json in first person.
+        Do not generate a response longer than 300 characters.
         Do not wrap the answer in a json or in quotation marks.
     """)
-    fun getQuestion(@MemoryId name: String, @UserMessage prompt: GenerateQuestionPrompt): String
+    fun getChat(@MemoryId name: String, @UserMessage prompt: GenerateQuestionPrompt): String
 
     @SystemMessage("""
         ${PromptConstants.VILLAGE_DESCRIPTION}

@@ -85,7 +85,7 @@ class VillageService(
         val from = villagerRepository.getVillager(first)
         val to = villagerRepository.getVillager(second)
         val prompt = GenerateQuestionPrompt(from, to)
-        return villagerAssistant.getQuestion(from.name, prompt)
+        return villagerAssistant.getChat(from.name, prompt)
     }
 
     fun initVillage(): Set<Villager> {
