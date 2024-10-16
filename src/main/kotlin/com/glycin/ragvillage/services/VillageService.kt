@@ -1,46 +1,42 @@
 package com.glycin.ragvillage.services
 
-import com.glycin.ragvillage.ai.JudgeService
-import com.glycin.ragvillage.ai.OllamaService
-import com.glycin.ragvillage.ai.OllamaVisionService
-import com.glycin.ragvillage.ai.QuestionType
+import com.glycin.ragvillage.ai.*
 import com.glycin.ragvillage.clients.AudioServerClient
 import com.glycin.ragvillage.model.*
 import com.glycin.ragvillage.repositories.VillagerRepository
 import com.glycin.ragvillage.repositories.WeaviateRepository
 import dev.langchain4j.service.TokenStream
+import io.quarkus.logging.Log
+import jakarta.inject.Singleton
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import mu.KotlinLogging
-import org.springframework.stereotype.Service
-
-private val LOG = KotlinLogging.logger {}
+import org.eclipse.microprofile.rest.client.inject.RestClient
 
 private const val BOBHU = "BOBHU"
 private const val SHOPKEEP = "SHOPKEEPER"
 private const val THE_METALHEAD = "THEMETALHEAD"
 
-@Service
+@Singleton
 class VillageService(
-    ollama: OllamaService,
+    private val villagerAssistant: VillagerAssistant,
+    private val commandJudge: CommandJudge,
+    private val questionJudge: QuestionJudge,
     private val theEye: OllamaVisionService,
-    private val judge: JudgeService,
     private val villagerRepository: VillagerRepository,
     private val weaviate: WeaviateRepository,
-    private val audioServerClient: AudioServerClient,
+    @RestClient private val audioServerClient: AudioServerClient,
 ) {
 
-    private val villagerAssistant = ollama.villagerAssistant
     private lateinit var villageState : VillageState
 
     fun commandVillager(name: String): VillagerCommand {
         if(!this::villageState.isInitialized) { initVillage() }
         val villager = villagerRepository.getVillager(name)
-        LOG.info { "Commanding $name" }
+        Log.info { "Commanding $name" }
         val potentialCommand = villagerAssistant.commandVillager(villager.name, VillagerCommandPrompt(villager.toPrompt(), villageState))
-        LOG.info { potentialCommand }
-        val command = judge.commandJudgment.judgeCommand(potentialCommand)
+        Log.info { potentialCommand }
+        val command = commandJudge.judgeCommand(potentialCommand)
 
         if(command.wait) {
             villager.state = VillagerState.IDLE
@@ -69,7 +65,7 @@ class VillageService(
 
     fun chatBetween(first: String, second: String, message: String): String {
         if(!this::villageState.isInitialized) { initVillage() }
-        LOG.info { "Chatting between $first and $second" }
+        Log.info { "Chatting between $first and $second" }
 
         val from = villagerRepository.getVillager(first)
         val to = villagerRepository.getVillager(second)
@@ -80,7 +76,7 @@ class VillageService(
 
     fun getQuestion(first: String, second: String): String {
         if(!this::villageState.isInitialized) { initVillage() }
-        LOG.info { "Getting question for $first addressed to $second" }
+        Log.info { "Getting question for $first addressed to $second" }
 
         val from = villagerRepository.getVillager(first)
         val to = villagerRepository.getVillager(second)
@@ -89,19 +85,18 @@ class VillageService(
     }
 
     fun initVillage(): Set<Villager> {
-        LOG.info { "initializing village" }
+        Log.info { "initializing village" }
         val allVillagers = villagerRepository.getAllVillagers()
         villageState = VillageState(
             allVillagers.map { it.name }.toSet(),
             VillageLocation.entries.map { it.name }.toSet(),
             "10:00",
         )
-        judge.initJudgement(allVillagers.map { v -> v.toPrompt() }.toList(), villageState.villageLocations)
         return villagerRepository.getAllVillagers()
     }
 
     fun orcishTranscribe(base64Image: String, orcName: String): Flow<String> {
-        LOG.info { "transcribing an image as an orc..." }
+        Log.info { "transcribing an image as an orc..." }
         return when(orcName.uppercase()) {
             SHOPKEEP -> {
                 val description = theEye.transcribe(base64Image)
@@ -126,19 +121,19 @@ class VillageService(
     }
 
     fun transcribe(base64Image: String): String {
-        LOG.info { "transcribing an image..." }
+        Log.info { "transcribing an image..." }
         return theEye.transcribe(base64Image)
     }
 
     fun searchForAudio(message: String): String {
-        LOG.info { "getting audio embeddings for text..." }
+        Log.info { "getting audio embeddings for text..." }
         val textAudioEmbeddings = audioServerClient.getTextEmbedding(message)
-        LOG.info { "found embeddings, querying weaviate for audio" }
+        Log.info { "found embeddings, querying weaviate for audio" }
         return weaviate.searchVector(textAudioEmbeddings.embedding)
     }
 
     fun chatWithBobhu(message:String): Flow<String> {
-        LOG.info { "chatting with the one and only Bobhu Rogosh..." }
+        Log.info { "chatting with the one and only Bobhu Rogosh..." }
         return chatFlow("Completed initial chat with Bobhu") {
             villagerAssistant.bobhu(BOBHU, message)
         }
@@ -146,9 +141,9 @@ class VillageService(
 
     fun chatWithShopkeep(message:String): Flow<String> {
         if(!this::villageState.isInitialized) { initVillage() }
-        LOG.info { "Chatting with the shopkeeper" }
-        val questionType = QuestionType.fromValueOrDefault(judge.questionJudgment.judgeQuestion(message))
-        LOG.info { "Received a $questionType question" }
+        Log.info { "Chatting with the shopkeeper" }
+        val questionType = QuestionType.fromValueOrDefault(questionJudge.judgeQuestion(message))
+        Log.info { "Received a $questionType question" }
         val newMessage = when (questionType) {
             QuestionType.CHAT -> message
             QuestionType.HISTORY -> message // TODO: Do weaviate call to find context
@@ -166,9 +161,9 @@ class VillageService(
 
     fun chatWithTheMetalhead(message: String): Flow<String> {
         if(!this::villageState.isInitialized) { initVillage() }
-        LOG.info { "Chatting with the metalhead" }
-        val questionType = QuestionType.fromValueOrDefault(judge.questionJudgment.judgeQuestion(message))
-        LOG.info { "Received a $questionType question" }
+        Log.info { "Chatting with the metalhead" }
+        val questionType = QuestionType.fromValueOrDefault(questionJudge.judgeQuestion(message))
+        Log.info { "Received a $questionType question" }
         val newMessage = when (questionType) {
             QuestionType.CHAT -> message
             QuestionType.MUSIC -> """
@@ -184,7 +179,7 @@ class VillageService(
 
     fun createLyricsForAudio(message: String, clipName: String): Flow<String> {
         if(!this::villageState.isInitialized) { initVillage() }
-        LOG.info { "Metalhead is singing for you" }
+        Log.info { "Metalhead is singing for you" }
         val newMessage = """
             You, the Metalhead, are playing a song for the user that is matching the following description: $message. The name of the song is $clipName
             Generate lyrics that match that song that fit your character! Keep the lyrics short, to one verse and a chorus.
@@ -207,10 +202,10 @@ class VillageService(
             stream.onNext {
                 trySend(it).isSuccess
             }.onComplete {
-                LOG.info { onCompleteMessage }
+                Log.info { onCompleteMessage }
                 close()
             }.onError { error ->
-                LOG.error { "${error.message}\n${error.stackTrace}" }
+                Log.error { "${error.message}\n${error.stackTrace}" }
                 close(error)
             }.start()
 
