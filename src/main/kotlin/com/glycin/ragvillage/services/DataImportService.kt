@@ -6,16 +6,16 @@ import com.glycin.ragvillage.repositories.WeaviateRepository
 import dev.langchain4j.data.document.loader.FileSystemDocumentLoader
 import dev.langchain4j.data.document.parser.TextDocumentParser
 import dev.langchain4j.data.document.splitter.DocumentSplitters
-import mu.KotlinLogging
-import org.springframework.stereotype.Service
+import io.quarkus.logging.Log
+import jakarta.inject.Singleton
+import org.eclipse.microprofile.rest.client.inject.RestClient
 import java.io.File
 
-private val LOG = KotlinLogging.logger {}
 
-@Service
+@Singleton
 class DataImportService(
     private val weaviate: WeaviateRepository,
-    private val audioServerClient: AudioServerClient,
+    @RestClient private val audioServerClient: AudioServerClient,
 ) {
 
     fun importTextChunk() {
@@ -26,13 +26,13 @@ class DataImportService(
                 LilMinasMorgulTextSegmentTransformer().transform(segments)
             }.forEach {
                 if(weaviate.addSimpleText(it.text())) {
-                    LOG.info { "Added text ${it.text()}" }
+                    Log.info { "Added text ${it.text()}" }
                 }
             }
     }
 
     fun importBobRossPaintings(directoryPath: String) {
-        LOG.info { "Loading in bob ross paintings" }
+        Log.info { "Loading in bob ross paintings" }
         val directory = File(directoryPath)
         val uris = directory
             .walk()
@@ -40,22 +40,22 @@ class DataImportService(
             .map { it.toURI() }
             .toList()
         weaviate.batchAddImages(uris)
-        LOG.info { "Finished loading in bob ross paintings" }
+        Log.info { "Finished loading in bob ross paintings" }
     }
 
     fun importAudioFiles(directoryPath: String) {
-        LOG.info { "Loading in audio files..." }
+        Log.info { "Loading in audio files..." }
         val directory = File(directoryPath)
         val uris = directory
             .walk()
             .filter { it.isFile && it.extension == "wav" || it.extension == "mp3" }
             .associate { it.name to it.toURI() }
         uris.forEach { uri ->
-            LOG.info { "Getting vectors for ${uri.value.path}" }
+            Log.info { "Getting vectors for ${uri.value.path}" }
             val embedding = audioServerClient.getAudioEmbedding(uri.value.path.trimStart('/'))
-            LOG.info { "Vector with dimensionality of ${embedding.embedding.size} retrieved, saving ${uri.key} to db..." }
+            Log.info { "Vector with dimensionality of ${embedding.embedding.size} retrieved, saving ${uri.key} to db..." }
             weaviate.addVector(uri.key, embedding.embedding)
         }
-        LOG.info { "Finished loading in audio files" }
+        Log.info { "Finished loading in audio files" }
     }
 }

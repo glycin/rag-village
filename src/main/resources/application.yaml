@@ -1,29 +1,26 @@
-spring:
+quarkus:
   application:
     name: rag-village
   jackson:
-    default-property-inclusion: non_empty
-    mapper:
-      accept-case-insensitive-enums: true
-
-langchain4j:
-  ollama:
-    url: http://localhost:11434
-    model-name: llama3.1:8b
-    temperature: 0.7
-    log-requests: false
-    log-responses: true
-  ollama-vision:
-    url: http://localhost:11434
-    model-name: llava:latest
-    temperature: 0.7
-    log-requests: false
-    log-responses: true
-
-logging:
-  level:
-    dev:
-      langchain4j: DEBUG
-
-server:
-  port: 1337
+    accept-case-insensitive-enums: true
+    serialization-inclusion: non-empty
+  log:
+    category:
+      "dev.langchain4j":
+        level: INFO
+  http:
+    port: 1337
+  langchain4j:
+    ollama:
+      chat:
+        log-requests: false
+        log-responses: true
+        chat-model:
+          model-id: llama3.1:8b
+          temperature: 0.7
+      vision:
+        log-requests: false
+        log-responses: true
+        chat-model:
+          model-id: llava:latest
+          temperature: 0.7
