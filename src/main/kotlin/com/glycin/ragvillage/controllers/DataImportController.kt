@@ -1,29 +1,28 @@
 package com.glycin.ragvillage.controllers
 
 import com.glycin.ragvillage.services.DataImportService
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import jakarta.ws.rs.POST
+import jakarta.ws.rs.Path
+import org.jboss.resteasy.reactive.RestQuery
 
-@RestController
-@RequestMapping("/api/import")
-class DataImportController(
-    private val importService: DataImportService
-) {
+@Path("/api/import")
+class DataImportController(private val importService: DataImportService) {
 
-    @PostMapping("text")
+    @POST
+    @Path("text")
     fun importText() {
         importService.importTextChunk()
     }
 
-    @PostMapping("bobRoss")
-    fun importBobRoss(@RequestParam dirPath: String) {
+    @POST
+    @Path("bobRoss")
+    fun importBobRoss(@RestQuery dirPath: String) {
         importService.importBobRossPaintings(dirPath)
     }
 
-    @PostMapping("audio")
-    fun importAudio(@RequestParam dirPath: String) {
+    @POST
+    @Path("audio")
+    fun importAudio(@RestQuery dirPath: String) {
         importService.importAudioFiles(dirPath)
     }
 }

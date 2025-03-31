@@ -3,9 +3,9 @@ package com.glycin.ragvillage.repositories
 import com.glycin.ragvillage.model.Personality
 import com.glycin.ragvillage.model.Villager
 import com.glycin.ragvillage.model.VillagerState
-import org.springframework.stereotype.Repository
+import jakarta.inject.Singleton
 
-@Repository
+@Singleton
 class VillagerRepository {
 
     private val villagers = mutableMapOf<String, Villager>()

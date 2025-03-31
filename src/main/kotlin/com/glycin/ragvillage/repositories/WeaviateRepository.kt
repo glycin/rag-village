@@ -1,8 +1,8 @@
 package com.glycin.ragvillage.repositories
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.glycin.ragvillage.utils.hasSchemaWithName
+import io.quarkus.logging.Log
 import io.weaviate.client.Config
 import io.weaviate.client.WeaviateClient
 import io.weaviate.client.v1.data.model.WeaviateObject
@@ -10,19 +10,15 @@ import io.weaviate.client.v1.graphql.query.argument.NearImageArgument
 import io.weaviate.client.v1.graphql.query.argument.NearTextArgument
 import io.weaviate.client.v1.graphql.query.argument.NearVectorArgument
 import io.weaviate.client.v1.graphql.query.fields.Field
-import mu.KotlinLogging
+import jakarta.inject.Singleton
 import org.apache.commons.io.FileUtils
-import org.springframework.stereotype.Repository
 import java.io.File
 import java.net.URI
 import java.util.*
 
-private val LOG = KotlinLogging.logger {}
+@Singleton
+class WeaviateRepository(private val objectMapper: ObjectMapper) {
 
-@Repository
-class WeaviateRepository {
-
-    private val objectMapper: ObjectMapper = ObjectMapper().registerKotlinModule()
     private val client = WeaviateClient(Config("http", "localhost:8080"))
 
     fun searchForSimpleText(text: String): List<String> {
@@ -41,7 +37,7 @@ class WeaviateRepository {
             ).run()
 
         if(result.hasErrors()) {
-            LOG.error{ "Could not search for ${WeaviateClassNames.SIMPLE_TEXT} and text: $text" }
+            Log.error{ "Could not search for ${WeaviateClassNames.SIMPLE_TEXT} and text: $text" }
             return emptyList()
         }
 
@@ -69,7 +65,7 @@ class WeaviateRepository {
             .run()
 
         if(result.hasErrors()) {
-            LOG.error{ "Could not search for ${WeaviateClassNames.STANDARD_MULTI_MODAL} and text: $text" }
+            Log.error{ "Could not search for ${WeaviateClassNames.STANDARD_MULTI_MODAL} and text: $text" }
             return ""
         }
 
@@ -79,7 +75,7 @@ class WeaviateRepository {
     }
 
     fun searchImageNearImage(image: String): String {
-        LOG.info { "Searching for image near" }
+        Log.info { "Searching for image near" }
         val result = client.graphQL()
             .get()
             .withClassName(WeaviateClassNames.STANDARD_MULTI_MODAL)
@@ -93,7 +89,7 @@ class WeaviateRepository {
             .run()
 
         if(result.hasErrors()) {
-            LOG.error{ "Could not search for ${WeaviateClassNames.STANDARD_MULTI_MODAL} with an image..." }
+            Log.error{ "Could not search for ${WeaviateClassNames.STANDARD_MULTI_MODAL} with an image..." }
             return ""
         }
 
@@ -115,7 +111,7 @@ class WeaviateRepository {
             .run()
 
         if(result.hasErrors()) {
-            LOG.error{ "Could not search for ${WeaviateClassNames.VECTOR_ONLY}" }
+            Log.error{ "Could not search for ${WeaviateClassNames.VECTOR_ONLY}" }
             return ""
         }
 
@@ -126,7 +122,7 @@ class WeaviateRepository {
 
     fun addSimpleText(text: String): Boolean {
         if(!client.hasSchemaWithName(WeaviateClassNames.SIMPLE_TEXT)) {
-            LOG.info { "No schema ${WeaviateClassNames.SIMPLE_TEXT} exists!" }
+            Log.info { "No schema ${WeaviateClassNames.SIMPLE_TEXT} exists!" }
             return false
         }
 
@@ -138,7 +134,7 @@ class WeaviateRepository {
             .run()
             .let {
                 if(it.hasErrors()) {
-                    LOG.error { "Couldn't add ${WeaviateClassNames.SIMPLE_TEXT} because of ${it.error}" }
+                    Log.error { "Couldn't add ${WeaviateClassNames.SIMPLE_TEXT} because of ${it.error}" }
                     false
                 }else {
                     true
@@ -148,7 +144,7 @@ class WeaviateRepository {
 
     fun addImage(image: String): Boolean {
         if(!client.hasSchemaWithName(WeaviateClassNames.STANDARD_MULTI_MODAL)) {
-            LOG.info { "No schema ${WeaviateClassNames.STANDARD_MULTI_MODAL} exists!" }
+            Log.info { "No schema ${WeaviateClassNames.STANDARD_MULTI_MODAL} exists!" }
             return false
         }
 
@@ -159,7 +155,7 @@ class WeaviateRepository {
             .run()
             .let {
                 if(it.hasErrors()) {
-                    LOG.error { "Couldn't add ${WeaviateClassNames.STANDARD_MULTI_MODAL} because of ${it.error}" }
+                    Log.error { "Couldn't add ${WeaviateClassNames.STANDARD_MULTI_MODAL} because of ${it.error}" }
                     false
                 }else {
                     true
@@ -169,12 +165,12 @@ class WeaviateRepository {
 
     fun batchAddImages(imagePaths: List<URI>): Boolean {
         if(!client.hasSchemaWithName(WeaviateClassNames.STANDARD_MULTI_MODAL)) {
-            LOG.info { "No schema ${WeaviateClassNames.STANDARD_MULTI_MODAL} exists!" }
+            Log.info { "No schema ${WeaviateClassNames.STANDARD_MULTI_MODAL} exists!" }
             return false
         }
 
         val batcher = client.batch().objectsBatcher()
-        LOG.info { "Importing bob ross paintings" }
+        Log.info { "Importing bob ross paintings" }
 
         imagePaths.forEachIndexed { i, uri ->
             val painting = File(uri)
@@ -190,18 +186,18 @@ class WeaviateRepository {
             )
 
             if(i % 50 == 0){
-                LOG.info { "Flushing batcher at $i" }
+                Log.info { "Flushing batcher at $i" }
                 batcher.flush()
             }
         }
         val result = batcher.run()
-        LOG.info { "DONE!" }
+        Log.info { "DONE!" }
         return !result.hasErrors()
     }
 
     fun addVector(label: String, vector: List<Float>): Boolean {
         if(!client.hasSchemaWithName(WeaviateClassNames.VECTOR_ONLY)) {
-            LOG.info { "No schema ${WeaviateClassNames.VECTOR_ONLY} exists!" }
+            Log.info { "No schema ${WeaviateClassNames.VECTOR_ONLY} exists!" }
             return false
         }
 
@@ -214,7 +210,7 @@ class WeaviateRepository {
             .run()
             .let {
                 if(it.hasErrors()) {
-                    LOG.error { "Couldn't add ${WeaviateClassNames.VECTOR_ONLY} because of ${it.error}" }
+                    Log.error { "Couldn't add ${WeaviateClassNames.VECTOR_ONLY} because of ${it.error}" }
                     false
                 }else {
                     true

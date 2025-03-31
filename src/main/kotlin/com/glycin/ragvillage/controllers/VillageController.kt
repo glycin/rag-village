@@ -5,114 +5,118 @@ import com.glycin.ragvillage.model.Villager
 import com.glycin.ragvillage.model.VillagerCommand
 import com.glycin.ragvillage.repositories.WeaviateRepository
 import com.glycin.ragvillage.services.VillageService
+import io.quarkus.logging.Log
+import jakarta.ws.rs.GET
+import jakarta.ws.rs.POST
+import jakarta.ws.rs.Path
+import jakarta.ws.rs.Produces
+import jakarta.ws.rs.core.MediaType.SERVER_SENT_EVENTS
 import kotlinx.coroutines.flow.Flow
-import mu.KotlinLogging
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.jboss.resteasy.reactive.RestQuery
 
-private val LOG = KotlinLogging.logger {}
-
-@RestController
-@RequestMapping("/api/village")
+@Path("/api/village")
 class VillageController(
-    val villageService: VillageService,
-    val weaviateRepository: WeaviateRepository,
-) {
+    private val villageService: VillageService,
+    private val weaviateRepository: WeaviateRepository) {
 
-    @GetMapping("/command")
-    fun commandVillager(@RequestParam("name") name: String): ResponseEntity<VillagerCommand> {
-        val response = villageService.commandVillager(name)
-        return ResponseEntity.ok().body(response)
+    @Path("/command")
+    @GET
+    fun commandVillager(@RestQuery name: String): VillagerCommand {
+        return villageService.commandVillager(name)
     }
 
-    @GetMapping("/chat", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
-    fun chatWithVillager(@RequestParam("name") name: String, @RequestParam message: String): ResponseEntity<Flow<String>> {
-        val response = villageService.chat(name, message)
-        return ResponseEntity.ok().body(response)
+    @Path("/chat")
+    @GET
+    @Produces(SERVER_SENT_EVENTS)
+    fun chatWithVillager(@RestQuery name: String, @RestQuery message: String): Flow<String> {
+        return villageService.chat(name, message)
     }
 
-    @GetMapping("/chat/betweenVillagers")
-    fun chatBetweenVillagers(@RequestParam("firstVillager") firstVillager: String,
-                             @RequestParam("secondVillager") secondVillager: String,
-                             @RequestParam("message") message: String
-    ): ResponseEntity<String> {
-        val response = villageService.chatBetween(firstVillager, secondVillager, message)
-        return ResponseEntity.ok().body(response)
+    @Path("/chat/betweenVillagers")
+    @GET
+    fun chatBetweenVillagers(@RestQuery firstVillager: String,
+                             @RestQuery secondVillager: String,
+                             @RestQuery message: String): String {
+        return villageService.chatBetween(firstVillager, secondVillager, message)
     }
 
-    @GetMapping("/chat/getQuestion")
-    fun chatBetweenVillagers(@RequestParam("firstVillager") firstVillager: String,
-                             @RequestParam("secondVillager") secondVillager: String,
-    ): ResponseEntity<String> {
-        val response = villageService.getQuestion(firstVillager, secondVillager)
-        return ResponseEntity.ok().body(response)
+    @Path("/chat/getQuestion")
+    @GET
+    fun chatBetweenVillagers(@RestQuery firstVillager: String,
+                             @RestQuery secondVillager: String): String {
+        return villageService.getQuestion(firstVillager, secondVillager)
     }
 
-    @GetMapping("/init")
-    fun initVillage(): ResponseEntity<Set<Villager>> {
+    @Path("/init")
+    @GET
+    fun initVillage(): Set<Villager> {
         val response = villageService.initVillage()
-        LOG.info { "Returning ${response.size} villagers" }
-        return ResponseEntity.ok().body(response)
+        Log.info { "Returning ${response.size} villagers" }
+        return response
     }
 
-    @GetMapping("/ask")
-    fun askQuestion(@RequestParam("question") question : String): ResponseEntity<String> {
-        val response = villageService.ask(question)
-        return ResponseEntity.ok().body(response)
+    @Path("/ask")
+    @GET
+    fun askQuestion(@RestQuery question : String): String {
+        return villageService.ask(question)
     }
 
-    @PostMapping("/image/orcTranscribe", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
-    fun orcTranscribe(@RequestBody image: ImageBody): ResponseEntity<Flow<String>> {
-        val response = villageService.orcishTranscribe(image.image, image.name)
-        return ResponseEntity.ok().body(response)
+    @Path("/image/orcTranscribe")
+    @POST
+    @Produces(SERVER_SENT_EVENTS)
+    fun orcTranscribe(image: ImageBody): Flow<String> {
+        return villageService.orcishTranscribe(image.image, image.name)
     }
 
-    @PostMapping("/image/transcribe")
-    fun transcribeImage(@RequestBody imageBase64: ImageBody): ResponseEntity<String> {
-        val response = villageService.transcribe(imageBase64.image)
-        return ResponseEntity.ok().body(response)
+    @Path("/image/transcribe")
+    @POST
+    fun transcribeImage(imageBase64: ImageBody): String {
+        return villageService.transcribe(imageBase64.image)
     }
 
-    @GetMapping("/image")
-    fun getImage(@RequestParam("message") message: String): ResponseEntity<String> {
-        val response = weaviateRepository.searchImageNearText(message)
-        return ResponseEntity.ok().body(response)
+    @Path("/image")
+    @GET
+    fun getImage(@RestQuery message: String): String {
+        return weaviateRepository.searchImageNearText(message)
     }
 
-    @PostMapping("/image/withImage")
-    fun getImageWithImage(@RequestBody imageBase64: ImageBody): ResponseEntity<String> {
-        val response = weaviateRepository.searchImageNearImage(imageBase64.image)
-        return ResponseEntity.ok().body(response)
+    @Path("/image/withImage")
+    @POST
+    fun getImageWithImage(imageBase64: ImageBody): String {
+        return weaviateRepository.searchImageNearImage(imageBase64.image)
     }
 
-    @GetMapping("/audio")
-    fun getAudioFilename(@RequestParam("message") message: String): ResponseEntity<String> {
-        val response = villageService.searchForAudio(message)
-        return ResponseEntity.ok().body(response)
+    @Path("/audio")
+    @GET
+    fun getAudioFilename(@RestQuery message: String): String {
+        return villageService.searchForAudio(message)
     }
 
-    @GetMapping("/chat/bobhu", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
-    fun chatWithBobhu(@RequestParam("message") message: String): ResponseEntity<Flow<String>> {
-        val response = villageService.chatWithBobhu(message)
-        return ResponseEntity.ok().body(response)
+    @Path("/chat/bobhu")
+    @GET
+    @Produces(SERVER_SENT_EVENTS)
+    fun chatWithBobhu(@RestQuery message: String): Flow<String> {
+        return villageService.chatWithBobhu(message)
     }
 
-    @GetMapping("/chat/shopkeep", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
-    fun chatWithShopkeep(@RequestParam("message") message: String): ResponseEntity<Flow<String>> {
-        val response = villageService.chatWithShopkeep(message)
-        return ResponseEntity.ok().body(response)
+    @Path("/chat/shopkeep")
+    @GET
+    @Produces(SERVER_SENT_EVENTS)
+    fun chatWithShopkeep(@RestQuery message: String): Flow<String> {
+        return villageService.chatWithShopkeep(message)
     }
 
-    @GetMapping("/chat/metalhead", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
-    fun chatWithTheMetalhead(@RequestParam("message") message: String): ResponseEntity<Flow<String>> {
-        val response = villageService.chatWithTheMetalhead(message)
-        return ResponseEntity.ok().body(response)
+    @Path("/chat/metalhead")
+    @GET
+    @Produces(SERVER_SENT_EVENTS)
+    fun chatWithTheMetalhead(@RestQuery message: String): Flow<String> {
+        return villageService.chatWithTheMetalhead(message)
     }
 
-    @GetMapping("/chat/metalhead/sing", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
-    fun metalheadSinger(@RequestParam("message") message: String, @RequestParam("clipName") clipName: String): ResponseEntity<Flow<String>> {
-        val response = villageService.createLyricsForAudio(message, clipName)
-        return ResponseEntity.ok().body(response)
+    @Path("/chat/metalhead/sing")
+    @GET
+    @Produces(SERVER_SENT_EVENTS)
+    fun metalheadSinger(@RestQuery message: String, @RestQuery clipName: String): Flow<String> {
+        return villageService.createLyricsForAudio(message, clipName)
     }
 }

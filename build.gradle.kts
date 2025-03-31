@@ -1,15 +1,12 @@
 plugins {
-	val kotlinVersion = "2.0.0"
-	val springBootVersion = "3.3.2"
-	val springDependencyManagementVersion = "1.1.6"
+	val kotlinVersion = "2.0.10"
 
 	base
 	idea
 
-	id("org.springframework.boot") version springBootVersion
-	id("io.spring.dependency-management") version springDependencyManagementVersion
 	kotlin("jvm") version kotlinVersion
-	kotlin("plugin.spring") version kotlinVersion
+	kotlin("plugin.allopen") version kotlinVersion
+	id("io.quarkus")
 }
 
 group = "com.glycin"
@@ -25,35 +22,24 @@ repositories {
 	mavenCentral()
 }
 
-val springCloudVersion = "2023.0.3"
-val langChainVersion = "0.33.0"
-val kotlinLoggingVersion = "3.0.5"
 val weaviateVersion = "4.8.2"
 val apacheCommonsVersion = "2.16.1"
+val quarkusLangChain4jVersion = "0.20.3"
 
-dependencyManagement {
-	imports {
-		mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
-	}
-}
+val quarkusPlatformGroupId: String by project
+val quarkusPlatformArtifactId: String by project
+val quarkusPlatformVersion: String by project
 
 dependencies {
+	implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
+
 	//Spring
-	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-	implementation("org.springframework.boot:spring-boot-starter-webflux")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-	implementation("org.jetbrains.kotlin:kotlin-reflect")
+	implementation("io.quarkus:quarkus-kotlin")
+	implementation("io.quarkus:quarkus-rest-jackson")
+	implementation("io.quarkus:quarkus-rest-client-jackson")
 
 	//Langchain4j
-	implementation("dev.langchain4j:langchain4j-ollama:$langChainVersion")
-	implementation("dev.langchain4j:langchain4j:$langChainVersion")
-
-	//Kotlin
-	implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
-	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	implementation("io.quarkiverse.langchain4j:quarkus-langchain4j-ollama:$quarkusLangChain4jVersion")
 
 	//Weaviate
 	implementation("io.weaviate:client:$weaviateVersion")
@@ -62,9 +48,8 @@ dependencies {
 	implementation("commons-io:commons-io:$apacheCommonsVersion")
 
 	//Test
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testImplementation("io.quarkus:quarkus-junit5")
+	testImplementation("io.rest-assured:rest-assured")
 }
 
 kotlin {
@@ -74,5 +59,18 @@ kotlin {
 }
 
 tasks.withType<Test> {
-	useJUnitPlatform()
+	systemProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager")
+}
+
+allOpen {
+	annotation("jakarta.ws.rs.Path")
+	annotation("jakarta.enterprise.context.ApplicationScoped")
+	annotation("jakarta.persistence.Entity")
+	annotation("io.quarkus.test.junit.QuarkusTest")
+}
+
+kotlin {
+	compilerOptions {
+		javaParameters = true
+	}
 }

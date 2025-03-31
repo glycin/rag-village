@@ -1,15 +1,18 @@
 package com.glycin.ragvillage.clients
 
-import org.springframework.cloud.openfeign.FeignClient
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestParam
+import jakarta.ws.rs.GET
+import jakarta.ws.rs.Path
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient
+import org.jboss.resteasy.reactive.RestQuery
 
-@FeignClient(value = "AudioServerClient", url = "http://127.0.0.1:8000/embedding")
+@RegisterRestClient(baseUri = "http://127.0.0.1:8000/embedding")
 interface AudioServerClient {
 
-    @GetMapping("/text")
-    fun getTextEmbedding(@RequestParam("text") text: String): AudioServerDto
+    @Path("/text")
+    @GET
+    fun getTextEmbedding(@RestQuery text: String): AudioServerDto
 
-    @GetMapping("/audio")
-    fun getAudioEmbedding(@RequestParam("filePath") filePath: String): AudioServerDto
+    @Path("/audio")
+    @GET
+    fun getAudioEmbedding(@RestQuery filePath: String): AudioServerDto
 }
