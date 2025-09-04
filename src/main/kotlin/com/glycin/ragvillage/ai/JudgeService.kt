@@ -55,7 +55,7 @@ class JudgeService(
                     .build()
             )
             .chatMemoryProvider {
-                MessageWindowChatMemory.withMaxMessages(2) // TODO: DO NET SET THIS TO 1, IT WILL REMOVE THE USER MESSAGE IF U ALSO HAVE A SYSTEM MESSAGE
+                MessageWindowChatMemory.withMaxMessages(2) // TODO: DO NOT SET THIS TO 1, IT WILL REMOVE THE USER MESSAGE IF U ALSO HAVE A SYSTEM MESSAGE
             }.systemMessageProvider {
                 """
                 You are tasked to analyze the message you receive and extract the type of question from it.
