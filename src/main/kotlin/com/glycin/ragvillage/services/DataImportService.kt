@@ -32,7 +32,7 @@ class DataImportService(
     }
 
     fun importBobRossPaintings(directoryPath: String) {
-        LOG.info { "Loading in bob ross paintings" }
+        LOG.info { "Loading in Bob Ross 🎨 paintings" }
         val directory = File(directoryPath)
         val uris = directory
             .walk()
@@ -40,11 +40,11 @@ class DataImportService(
             .map { it.toURI() }
             .toList()
         weaviate.batchAddImages(uris)
-        LOG.info { "Finished loading in bob ross paintings" }
+        LOG.info { "Finished loading in Bob Ross 🎨 paintings" }
     }
 
     fun importAudioFiles(directoryPath: String) {
-        LOG.info { "Loading in audio files..." }
+        LOG.info { "Loading in audio 🎸 files..." }
         val directory = File(directoryPath)
         val uris = directory
             .walk()
@@ -56,6 +56,6 @@ class DataImportService(
             LOG.info { "Vector with dimensionality of ${embedding.embedding.size} retrieved, saving ${uri.key} to db..." }
             weaviate.addVector(uri.key, embedding.embedding)
         }
-        LOG.info { "Finished loading in audio files" }
+        LOG.info { "Finished loading in audio 🎸 files" }
     }
 }
