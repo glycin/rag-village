@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from msclap import CLAP
 
 app = FastAPI()
-clap_model = CLAP(version = '2023', use_cuda=True)
+clap_model = CLAP(version = '2023', use_cuda=False)
 
 @app.get("/embedding/audio")
 async def embed_audio(filePath: str):
