@@ -13,7 +13,7 @@ services:
     - 8080:8080
     - 50051:50051
     volumes:
-    - C:\Projects\VectorDbs\rag_village_weaviate_volume:/var/lib/weaviate
+    - /Users/glycin/Projects/rag-village-data/rag_village_weaviate_volume:/var/lib/weaviate
     restart: on-failure:0
     environment:
       CLIP_INFERENCE_API: 'http://multi2vec-clip:8080'

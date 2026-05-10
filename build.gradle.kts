@@ -17,8 +17,12 @@ version = "0.0.1-SNAPSHOT"
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(22)
+		languageVersion = JavaLanguageVersion.of(24)
 	}
+}
+
+tasks.withType<JavaCompile> {
+	options.release = 22
 }
 
 repositories {
@@ -75,4 +79,8 @@ kotlin {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+	jvmArgs("--enable-native-access=ALL-UNNAMED")
 }

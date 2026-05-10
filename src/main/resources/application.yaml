@@ -21,6 +21,8 @@ langchain4j:
     log-responses: true
 
 logging:
+  pattern:
+    console: "%blue(%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}): %msg%n"
   level:
     dev:
       langchain4j: DEBUG
